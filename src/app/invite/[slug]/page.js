@@ -605,6 +605,16 @@ END:VCALENDAR`;
             )}
           </Card>
         )}
+        {/* Link para gerenciar RSVP */}
+        <div className="text-center mt-6">
+          <p className="text-gray-600 mb-3">Já confirmou presença?</p>
+          <Button
+            size="large"
+            onClick={() => (window.location.href = `/rsvp/${slug}`)}
+          >
+            Gerenciar Minha Confirmação
+          </Button>
+        </div>
       </div>
     </div>
   );
