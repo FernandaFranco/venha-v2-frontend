@@ -204,9 +204,6 @@ export default function ConvitePage() {
         event_slug: slug,
         whatsapp_number: values.whatsapp_number,
         name: values.name,
-        family_member_names: values.family_members
-          ? values.family_members.split(",").map((n) => n.trim())
-          : [],
         num_adults: values.num_adults || 1,
         num_children: values.num_children || 0,
         comments: values.comments || "",
@@ -549,18 +546,6 @@ END:VCALENDAR`;
                   />
                 </Form.Item>
               </div>
-
-              {/* Nomes dos familiares */}
-              <Form.Item
-                label="Nomes dos Acompanhantes (opcional)"
-                name="family_members"
-                extra="Separe os nomes por vírgula. Ex: João Silva, Maria Silva"
-              >
-                <Input.TextArea
-                  rows={2}
-                  placeholder="João Silva, Maria Silva"
-                />
-              </Form.Item>
 
               {/* Comentários */}
               <Form.Item
