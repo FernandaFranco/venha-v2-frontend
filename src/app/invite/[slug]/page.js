@@ -37,6 +37,7 @@ import { Tooltip } from "antd";
 import { InfoCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { InviteSkeleton } from "../../components/LoadingSkeleton";
 import { formatDateWithWeekday } from "../../utils/dateUtils";
+import Logo from "../../components/Logo";
 
 // Importar mapa dinamicamente (só no client-side)
 const MapWithNoSSR = dynamic(() => import("../../components/EventMap"), {
@@ -323,8 +324,8 @@ END:VCALENDAR`;
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-indigo-600 mb-2">Venha</h1>
-          <p className="text-gray-600">Você foi convidado!</p>
+          <Logo size="large" variant="full" />
+          <p className="text-gray-600 mt-2">Você foi convidado!</p>
         </div>
 
         {/* Informações do evento */}

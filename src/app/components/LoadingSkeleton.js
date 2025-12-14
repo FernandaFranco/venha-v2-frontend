@@ -37,7 +37,7 @@ export function EventDetailsSkeleton() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
-            <Space direction="vertical" style={{ width: "100%" }}>
+            <Space orientation="vertical" style={{ width: "100%" }}>
               <Skeleton.Input active size="small" style={{ width: 100 }} />
               <Skeleton.Input active size="large" style={{ width: 60 }} />
             </Space>
@@ -67,7 +67,7 @@ export function InviteSkeleton() {
     <div className="max-w-4xl mx-auto space-y-6 p-4">
       {/* Header card */}
       <Card>
-        <Space direction="vertical" style={{ width: "100%" }} size="large">
+        <Space orientation="vertical" style={{ width: "100%" }} size="large">
           <Skeleton.Input active size="large" style={{ width: "100%" }} block />
           <Skeleton active paragraph={{ rows: 3 }} />
         </Space>
@@ -105,7 +105,7 @@ export function InviteSkeleton() {
 export function FormSkeleton() {
   return (
     <Card>
-      <Space direction="vertical" style={{ width: "100%" }} size="large">
+      <Space orientation="vertical" style={{ width: "100%" }} size="large">
         <Skeleton.Input active size="large" block />
         <Skeleton active paragraph={{ rows: 2 }} />
         <div className="grid grid-cols-3 gap-4">

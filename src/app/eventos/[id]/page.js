@@ -33,6 +33,7 @@ import {
 } from "@ant-design/icons";
 import { EventDetailsSkeleton } from "../../components/LoadingSkeleton";
 import { formatDateBR } from "../../utils/dateUtils";
+import Logo from "../../components/Logo";
 
 const { Text } = Typography;
 
@@ -344,11 +345,15 @@ export default function EventoDetalhes() {
         <nav className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <div style={{ width: 150 }}>
-                <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-              <h1 className="text-xl font-bold text-indigo-600">Venha</h1>
-              <div style={{ width: 150 }}></div>
+              <Button
+                type="link"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => router.push("/dashboard")}
+              >
+                Voltar ao Dashboard
+              </Button>
+              <Logo size="medium" variant="full" />
+              <div className="w-40"></div>
             </div>
           </div>
         </nav>

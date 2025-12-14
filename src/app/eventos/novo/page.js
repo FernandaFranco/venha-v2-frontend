@@ -24,6 +24,7 @@ import {
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import "dayjs/locale/pt-br";
+import Logo from "../../components/Logo";
 
 const { TextArea } = Input;
 
@@ -262,7 +263,7 @@ export default function NovoEvento() {
             >
               ← Voltar
             </button>
-            <h1 className="text-xl font-bold text-indigo-600">Venha</h1>
+            <Logo size="medium" variant="full" />
             <div className="w-20"></div>
           </div>
         </div>

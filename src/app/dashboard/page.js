@@ -27,6 +27,7 @@ import {
 } from "@ant-design/icons";
 import { DashboardSkeleton } from "../components/LoadingSkeleton";
 import { formatDateRelative } from "../utils/dateUtils";
+import Logo from "../components/Logo";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -34,6 +35,7 @@ export default function Dashboard() {
   const router = useRouter();
   const { message } = App.useApp(); // ← Hook do Ant Design para mensagens
   const hasFetched = useRef(false);
+  const isLoading = useRef(false); // ← Nova flag para evitar chamadas simultâneas
 
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
@@ -41,14 +43,21 @@ export default function Dashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (hasFetched.current) return;
+    // Dupla proteção
+    if (hasFetched.current || isLoading.current) return;
+
     hasFetched.current = true;
+    isLoading.current = true;
+
     loadData();
-  }, []);
+  }, []); // ← Dependências vazias
 
   const loadData = async () => {
     try {
       setLoading(true);
+
+      // Adicionar delay para evitar rate limit em desenvolvimento
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const [userResponse, eventsResponse] = await Promise.all([
         axios.get("http://localhost:5000/api/auth/me", {
@@ -66,12 +75,19 @@ export default function Dashboard() {
 
       if (err.response?.status === 401) {
         router.push("/auth");
+      } else if (err.response?.status === 429) {
+        // Tratamento específico para rate limit
+        setError(
+          "Muitas requisições. Aguarde um momento e recarregue a página."
+        );
+        message.warning("Muitas requisições. Aguarde um momento.");
       } else {
         setError("Erro ao carregar dados");
         message.error("Erro ao carregar dados");
       }
     } finally {
       setLoading(false);
+      isLoading.current = false;
     }
   };
 
@@ -125,9 +141,11 @@ export default function Dashboard() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Title level={2} className="!mb-0 text-indigo-600">
-              Venha
-            </Title>
+            <Logo
+              size="medium"
+              variant="full"
+              onClick={() => router.push("/dashboard")}
+            />
 
             <Space size="middle">
               {user && (
