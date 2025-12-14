@@ -293,15 +293,7 @@ END:VCALENDAR`;
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-        <div className="text-center mb-8">
-          <div className="h-10 w-32 bg-white/50 rounded mx-auto mb-2 animate-pulse"></div>
-          <div className="h-4 w-48 bg-white/50 rounded mx-auto animate-pulse"></div>
-        </div>
-        <InviteSkeleton />
-      </div>
-    );
+    return <InviteSkeleton />;
   }
 
   if (!event) {

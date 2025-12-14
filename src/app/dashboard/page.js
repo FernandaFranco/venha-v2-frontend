@@ -7,9 +7,7 @@ import axios from "axios";
 import {
   Button,
   Card,
-  Tag,
   Empty,
-  Statistic,
   Space,
   Typography,
   Divider,
@@ -40,7 +38,6 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     // Dupla proteção
@@ -77,12 +74,8 @@ export default function Dashboard() {
         router.push("/auth");
       } else if (err.response?.status === 429) {
         // Tratamento específico para rate limit
-        setError(
-          "Muitas requisições. Aguarde um momento e recarregue a página."
-        );
         message.warning("Muitas requisições. Aguarde um momento.");
       } else {
-        setError("Erro ao carregar dados");
         message.error("Erro ao carregar dados");
       }
     } finally {
@@ -114,25 +107,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <Title level={2} className="!mb-0 text-indigo-600">
-                Venha
-              </Title>
-              <div style={{ width: 100 }}>
-                <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <DashboardSkeleton />
-        </main>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
