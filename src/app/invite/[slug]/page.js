@@ -324,7 +324,7 @@ END:VCALENDAR`;
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Logo size="large" variant="full" />
+          <Logo size="medium" variant="full" />
           <p className="text-gray-600 mt-2">Você foi convidado!</p>
         </div>
 

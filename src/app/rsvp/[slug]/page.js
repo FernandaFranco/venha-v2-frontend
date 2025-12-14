@@ -23,6 +23,7 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import Logo from "../../components/Logo";
 
 const { TextArea } = Input;
 
@@ -156,8 +157,8 @@ export default function ManageRSVPPage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-indigo-600 mb-2">Venha</h1>
-          <p className="text-gray-600">Gerenciar Confirmação</p>
+          <Logo size="medium" variant="full" />
+          <p className="text-gray-600 mt-2">Gerenciar Confirmação</p>
         </div>
 
         {/* Step 1: Search */}
@@ -170,7 +171,7 @@ export default function ManageRSVPPage() {
               Digite o WhatsApp que você usou para confirmar presença
             </p>
 
-            <Space direction="vertical" size="large" className="w-full">
+            <Space orientation="vertical" size="large" className="w-full">
               <Input
                 size="large"
                 placeholder="5521999999999"
@@ -196,7 +197,7 @@ export default function ManageRSVPPage() {
             <Divider />
 
             <Alert
-              message="Dica"
+              title="Dica"
               description="Informe apenas os números do WhatsApp, sem espaços ou caracteres especiais. Exemplo: 5521999999999"
               type="info"
               showIcon
@@ -217,7 +218,7 @@ export default function ManageRSVPPage() {
             {/* Status atual */}
             {attendee.status === "cancelled" && (
               <Alert
-                message="Confirmação Cancelada"
+                title="Confirmação Cancelada"
                 description="Sua confirmação foi cancelada. Você pode modificá-la para reativar."
                 type="warning"
                 showIcon
@@ -227,7 +228,7 @@ export default function ManageRSVPPage() {
 
             {attendee.status === "confirmed" && (
               <Alert
-                message="Confirmação Ativa"
+                title="Confirmação Ativa"
                 description="Sua presença está confirmada!"
                 type="success"
                 showIcon
@@ -286,7 +287,7 @@ export default function ManageRSVPPage() {
               </Form.Item>
 
               {/* Botões de ação */}
-              <Space direction="vertical" size="middle" className="w-full">
+              <Space orientation="vertical" size="middle" className="w-full">
                 {event.allow_modifications && (
                   <Button
                     type="primary"
@@ -302,7 +303,7 @@ export default function ManageRSVPPage() {
 
                 {!event.allow_modifications && (
                   <Alert
-                    message="Modificações não permitidas"
+                    title="Modificações não permitidas"
                     description="O anfitrião não permite alterações neste evento"
                     type="warning"
                     showIcon
@@ -324,7 +325,7 @@ export default function ManageRSVPPage() {
 
                 {!event.allow_cancellations && (
                   <Alert
-                    message="Cancelamentos não permitidos"
+                    title="Cancelamentos não permitidos"
                     description="O anfitrião não permite cancelamentos neste evento"
                     type="info"
                     showIcon
@@ -343,14 +344,14 @@ export default function ManageRSVPPage() {
         {step === "modified" && (
           <Card>
             <Alert
-              message="Confirmação Atualizada!"
+              title="Confirmação Atualizada!"
               description="Suas alterações foram salvas com sucesso. O anfitrião foi notificado."
               type="success"
               showIcon
               className="mb-6"
             />
 
-            <Space direction="vertical" size="middle" className="w-full">
+            <Space orientation="vertical" size="middle" className="w-full">
               <Button
                 type="primary"
                 size="large"
@@ -371,14 +372,14 @@ export default function ManageRSVPPage() {
         {step === "cancelled" && (
           <Card>
             <Alert
-              message="Confirmação Cancelada"
+              title="Confirmação Cancelada"
               description="Sua presença foi cancelada com sucesso. O anfitrião foi notificado."
               type="info"
               showIcon
               className="mb-6"
             />
 
-            <Space direction="vertical" size="middle" className="w-full">
+            <Space orientation="vertical" size="middle" className="w-full">
               <Button
                 type="primary"
                 size="large"

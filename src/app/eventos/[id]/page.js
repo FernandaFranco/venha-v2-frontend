@@ -377,7 +377,7 @@ export default function EventoDetalhes() {
             >
               Voltar ao Dashboard
             </Button>
-            <h1 className="text-xl font-bold text-indigo-600">Venha</h1>
+            <Logo size="medium" variant="full" />
             <div className="w-40"></div>
           </div>
         </div>

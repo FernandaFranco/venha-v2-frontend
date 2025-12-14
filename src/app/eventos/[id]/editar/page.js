@@ -15,6 +15,7 @@ import {
 } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import Logo from "../../../components/Logo";
 
 const { TextArea } = Input;
 
@@ -132,7 +133,7 @@ export default function EditarEvento() {
             >
               Voltar
             </Button>
-            <h1 className="text-xl font-bold text-indigo-600">Venha</h1>
+            <Logo size="medium" variant="full" />
             <div className="w-20"></div>
           </div>
         </div>
@@ -151,7 +152,7 @@ export default function EditarEvento() {
           {/* Mensagens */}
           {error && (
             <Alert
-              message="Erro"
+              title="Erro"
               description={error}
               type="error"
               closable
@@ -162,7 +163,7 @@ export default function EditarEvento() {
 
           {success && (
             <Alert
-              message="Sucesso!"
+              title="Sucesso!"
               description={success}
               type="success"
               showIcon
@@ -294,7 +295,7 @@ export default function EditarEvento() {
                 {formData.address_full}
               </p>
               <Alert
-                message="Para alterar o endereço, crie um novo evento"
+                title="Para alterar o endereço, crie um novo evento"
                 type="info"
                 showIcon
               />

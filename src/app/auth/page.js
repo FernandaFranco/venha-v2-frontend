@@ -4,6 +4,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Logo from "../components/Logo";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -97,11 +98,11 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
-        {/* Título */}
+        {/* Logo e título */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-indigo-600">Venha</h1>
+          <Logo size="medium" variant="full" />
           <p className="text-gray-600 mt-2">
-            {isLogin ? "Entre na sua conta" : "Crie sua conta"}
+            {isLogin ? "Faça login para continuar" : "Crie sua conta"}
           </p>
         </div>
 
