@@ -27,8 +27,10 @@ import {
   ClockCircleOutlined,
   EnvironmentOutlined,
   TeamOutlined,
-  CopyOutlined as DuplicateOutlined, // Renomear para não conflitar
+  CopyOutlined as DuplicateOutlined,
 } from "@ant-design/icons";
+import { EventDetailsSkeleton } from "../../components/LoadingSkeleton";
+import { formatDateBR } from "../../utils/dateUtils";
 
 export default function EventoDetalhes() {
   const params = useParams();
@@ -242,7 +244,7 @@ export default function EventoDetalhes() {
   // Formatar data
   const formatDate = (dateString) => {
     // Parse manual para evitar conversão UTC
-    const [year, month, day] = dateString.split('-').map(Number);
+    const [year, month, day] = dateString.split("-").map(Number);
     const date = new Date(year, month - 1, day); // month é 0-indexed
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
@@ -334,11 +336,21 @@ export default function EventoDetalhes() {
 
   if (loading || !event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div style={{ width: 150 }}>
+                <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <h1 className="text-xl font-bold text-indigo-600">Venha</h1>
+              <div style={{ width: 150 }}></div>
+            </div>
+          </div>
+        </nav>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <EventDetailsSkeleton />
+        </main>
       </div>
     );
   }
@@ -372,7 +384,7 @@ export default function EventoDetalhes() {
           <div className="flex flex-wrap gap-4 text-gray-600">
             <span className="flex items-center">
               <CalendarOutlined className="mr-2" />
-              {formatDate(event.event_date)}
+              {formatDateBR(event.event_date)}
             </span>
             <span className="flex items-center">
               <ClockCircleOutlined className="mr-2" />
@@ -414,7 +426,6 @@ export default function EventoDetalhes() {
           </Card>
         </div>
 
-        {/* Ações */}
         {/* Ações */}
         <Card className="mb-6">
           <div className="flex flex-wrap gap-3">

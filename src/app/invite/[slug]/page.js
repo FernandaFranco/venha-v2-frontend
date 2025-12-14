@@ -28,6 +28,15 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import dynamic from "next/dynamic";
+import {
+  validateWhatsApp,
+  formatWhatsApp,
+  ERROR_MESSAGES,
+} from "../../utils/validators";
+import { Tooltip } from "antd";
+import { InfoCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { InviteSkeleton } from "../../components/LoadingSkeleton";
+import { formatDateWithWeekday } from "../../utils/dateUtils";
 
 // Importar mapa dinamicamente (só no client-side)
 const MapWithNoSSR = dynamic(() => import("../../components/EventMap"), {
@@ -71,7 +80,6 @@ export default function ConvitePage() {
     }
   };
 
-  // Buscar clima
   // Buscar clima para a data do evento
   const fetchWeather = async () => {
     try {
@@ -273,7 +281,7 @@ END:VCALENDAR`;
   // Formatar data
   const formatDate = (dateString) => {
     // Parse manual para evitar conversão UTC
-    const [year, month, day] = dateString.split('-').map(Number);
+    const [year, month, day] = dateString.split("-").map(Number);
     const date = new Date(year, month - 1, day); // month é 0-indexed
     return date.toLocaleDateString("pt-BR", {
       weekday: "long",
@@ -285,11 +293,12 @@ END:VCALENDAR`;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando convite...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+        <div className="text-center mb-8">
+          <div className="h-10 w-32 bg-white/50 rounded mx-auto mb-2 animate-pulse"></div>
+          <div className="h-4 w-48 bg-white/50 rounded mx-auto animate-pulse"></div>
         </div>
+        <InviteSkeleton />
       </div>
     );
   }
@@ -337,7 +346,7 @@ END:VCALENDAR`;
               <div>
                 <p className="text-gray-500 text-sm">Data</p>
                 <p className="text-gray-900 font-medium capitalize">
-                  {formatDate(event.event_date)}
+                  {formatDateWithWeekday(event.event_date)}
                 </p>
               </div>
             </div>
@@ -500,25 +509,40 @@ END:VCALENDAR`;
 
               {/* WhatsApp */}
               <Form.Item
-                label="WhatsApp"
+                label={
+                  <span>
+                    WhatsApp{" "}
+                    <Tooltip title="Será usado para enviar confirmação e futuras atualizações sobre o evento">
+                      <QuestionCircleOutlined className="text-gray-400" />
+                    </Tooltip>
+                  </span>
+                }
                 name="whatsapp_number"
                 rules={[
+                  { required: true, message: ERROR_MESSAGES.WHATSAPP_REQUIRED },
                   {
-                    required: true,
-                    message: "Por favor, informe seu WhatsApp",
-                  },
-                  {
-                    pattern: /^\d{10,15}$/,
-                    message:
-                      "WhatsApp deve conter apenas números (10-15 dígitos)",
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      const validated = validateWhatsApp(value);
+                      if (!validated) {
+                        return Promise.reject(
+                          new Error(ERROR_MESSAGES.WHATSAPP_INVALID)
+                        );
+                      }
+                      return Promise.resolve();
+                    },
                   },
                 ]}
+                normalize={(value) => {
+                  // Auto-formatar enquanto digita
+                  return formatWhatsApp(value);
+                }}
               >
                 <Input
                   size="large"
-                  placeholder="5521999999999"
+                  placeholder="(21) 99999-9999 ou 5521999999999"
                   prefix={<WhatsAppOutlined />}
-                  maxLength={15}
+                  maxLength={20}
                 />
               </Form.Item>
 

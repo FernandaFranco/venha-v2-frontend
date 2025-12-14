@@ -1,51 +1,63 @@
 // src/app/dashboard/page.js
 "use client";
 
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Button, Card, Tag, Empty } from "antd";
+import {
+  PlusOutlined,
+  CalendarOutlined,
+  TeamOutlined,
+  EnvironmentOutlined,
+} from "@ant-design/icons";
+import { DashboardSkeleton } from "../components/LoadingSkeleton";
+import { formatDateRelative } from "../utils/dateUtils";
 
 export default function Dashboard() {
   const router = useRouter();
+  const hasFetched = useRef(false); // ← Flag para evitar dupla chamada
 
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Carregar dados do usuário e eventos quando a página carregar
+  // Carregar dados quando a página carregar
   useEffect(() => {
-    loadUserData();
-    loadEvents();
-  }, []);
+    // Evitar dupla chamada no React Strict Mode
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-  // Carregar dados do usuário logado
-  const loadUserData = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/auth/me", {
-        withCredentials: true,
-      });
-      setUser(response.data.host);
-    } catch (err) {
-      console.error("Erro ao carregar usuário:", err);
-      // Se não estiver autenticado, redirecionar para login
-      router.push("/auth");
-    }
-  };
+    loadData();
+  }, []); // ← Array vazio está correto
 
-  // Carregar lista de eventos
-  const loadEvents = async () => {
+  // Combinar chamadas em uma única função
+  const loadData = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/events/my-events",
-        {
+      setLoading(true);
+
+      // Chamar ambas APIs em paralelo
+      const [userResponse, eventsResponse] = await Promise.all([
+        axios.get("http://localhost:5000/api/auth/me", {
           withCredentials: true,
-        }
-      );
-      setEvents(response.data.events);
+        }),
+        axios.get("http://localhost:5000/api/events/my-events", {
+          withCredentials: true,
+        }),
+      ]);
+
+      setUser(userResponse.data.host);
+      setEvents(eventsResponse.data.events);
     } catch (err) {
-      setError("Erro ao carregar eventos");
-      console.error("Erro:", err);
+      console.error("Erro ao carregar dados:", err);
+
+      // Se for 401 (não autenticado), redirecionar
+      if (err.response?.status === 401) {
+        router.push("/auth");
+      } else {
+        setError("Erro ao carregar dados");
+      }
     } finally {
       setLoading(false);
     }
@@ -67,25 +79,23 @@ export default function Dashboard() {
     }
   };
 
-  // Formatar data para exibição
-  const formatDate = (dateString) => {
-    // Parse manual para evitar conversão UTC
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // month é 0-indexed
-    return date.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
+  // LOADING STATE COM SKELETON
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <h1 className="text-2xl font-bold text-indigo-600">Venha</h1>
+              <div style={{ width: 100 }}>
+                <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <DashboardSkeleton />
+        </main>
       </div>
     );
   }
@@ -108,12 +118,7 @@ export default function Dashboard() {
                   Olá, <strong>{user.name}</strong>
                 </span>
               )}
-              <button
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Sair
-              </button>
+              <Button onClick={handleLogout}>Sair</Button>
             </div>
           </div>
         </div>
@@ -125,18 +130,20 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900">Meus Eventos</h2>
-            <p className="text-gray-600 mt-1">
-              Gerencie seus convites e confirmações
+            <p className="text-gray-600 mt-2">
+              Gerencie seus eventos e acompanhe as confirmações
             </p>
           </div>
 
           {/* Botão para criar novo evento */}
-          <button
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
             onClick={() => router.push("/eventos/novo")}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition duration-200"
           >
-            + Criar Evento
-          </button>
+            Novo Evento
+          </Button>
         </div>
 
         {/* Mensagem de erro */}
@@ -148,39 +155,37 @@ export default function Dashboard() {
 
         {/* Lista de eventos */}
         {events.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <Card className="text-center py-12">
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Nenhum evento criado ainda
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Comece criando seu primeiro evento e compartilhe o convite
+                    com seus convidados!
+                  </p>
+                </div>
+              }
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <h3 className="mt-2 text-lg font-medium text-gray-900">
-              Nenhum evento ainda
-            </h3>
-            <p className="mt-1 text-gray-500">
-              Comece criando seu primeiro evento!
-            </p>
-            <button
-              onClick={() => router.push("/eventos/novo")}
-              className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
-            >
-              Criar Primeiro Evento
-            </button>
-          </div>
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={() => router.push("/eventos/novo")}
+              >
+                Criar Primeiro Evento
+              </Button>
+            </Empty>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <div
                 key={event.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition duration-200 overflow-hidden cursor-pointer"
+                className="bg-white rounded-lg shadow hover:shadow-lg transition duration-200 overflow-hidden cursor-pointer fade-in-up"
                 onClick={() => router.push(`/eventos/${event.id}`)}
               >
                 {/* Card Header */}
@@ -189,12 +194,19 @@ export default function Dashboard() {
                     {event.title}
                   </h3>
                   <p className="text-indigo-100 mt-1">
-                    {formatDate(event.event_date)} às {event.start_time}
+                    {formatDateRelative(event.event_date)} às {event.start_time}
                   </p>
                 </div>
 
                 {/* Card Body */}
                 <div className="p-6">
+                  {/* Descrição (se houver) */}
+                  {event.description && (
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {event.description}
+                    </p>
+                  )}
+
                   {/* Estatísticas */}
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div className="text-center">
@@ -229,9 +241,8 @@ export default function Dashboard() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigator.clipboard.writeText(
-                            `http://localhost:3000/invite/${event.slug}`
-                          );
+                          const link = `${window.location.origin}/invite/${event.slug}`;
+                          navigator.clipboard.writeText(link);
                           alert("Link copiado!");
                         }}
                         className="ml-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium"

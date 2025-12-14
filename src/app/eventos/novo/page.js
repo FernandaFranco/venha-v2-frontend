@@ -1,6 +1,14 @@
 // src/app/eventos/novo/page.js
 "use client";
 
+import {
+  validateCEP,
+  validateFutureDate,
+  validateTimeRange,
+  ERROR_MESSAGES,
+} from "../../utils/validators";
+import { Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -56,8 +64,7 @@ export default function NovoEvento() {
   const [cepValidation, setCepValidation] = useState({ type: "", message: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  // ... (mantenha todas as funções fetchAddress, handleChange, etc)
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Buscar endereço pelo CEP
   const fetchAddress = async (cep) => {
@@ -191,12 +198,38 @@ export default function NovoEvento() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validações
+    const errors = {};
+
+    if (!validateFutureDate(formData.event_date)) {
+      errors.event_date = ERROR_MESSAGES.DATE_PAST;
+    }
+
+    if (!validateTimeRange(formData.start_time, formData.end_time)) {
+      errors.end_time = ERROR_MESSAGES.TIME_INVALID;
+    }
+
+    if (!validateCEP(formData.address_cep)) {
+      errors.address_cep = ERROR_MESSAGES.CEP_INVALID;
+    }
+
+    if (!formData.address_number) {
+      errors.address_number = ERROR_MESSAGES.REQUIRED_FIELD;
+    }
+
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      message.error("Por favor, corrija os erros no formulário");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      // O backend fará a geocodificação automaticamente
       const response = await axios.post(
         "http://localhost:5000/api/events/create",
         formData,
@@ -308,9 +341,13 @@ export default function NovoEvento() {
             {/* Data e Horários */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {/* Data */}
+              {/* Exemplo: Campo de Data com tooltip */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Data *
+                  <Tooltip title="O evento deve ser no futuro">
+                    <InfoCircleOutlined className="ml-2 text-gray-400" />
+                  </Tooltip>
                 </label>
                 <DatePicker
                   format="DD/MM/YYYY"
@@ -324,14 +361,25 @@ export default function NovoEvento() {
                       ...formData,
                       event_date: date ? date.format("YYYY-MM-DD") : "",
                     });
+                    // Limpar erro ao alterar
+                    setValidationErrors({
+                      ...validationErrors,
+                      event_date: undefined,
+                    });
                   }}
                   placeholder="Selecione a data"
                   size="large"
                   className="w-full"
+                  status={validationErrors.event_date ? "error" : ""}
                   disabledDate={(current) => {
                     return current && current < dayjs().startOf("day");
                   }}
                 />
+                {validationErrors.event_date && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {validationErrors.event_date}
+                  </p>
+                )}
               </div>
 
               {/* Hora de Início */}
