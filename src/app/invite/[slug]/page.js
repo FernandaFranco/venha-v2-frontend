@@ -434,7 +434,7 @@ END:VCALENDAR`;
         {weather && weather.isUnavailable && (
           <Card className="mb-6">
             <Alert
-              message="Previsão do tempo não disponível"
+              title="Previsão do tempo não disponível"
               description={weather.description}
               type="info"
               showIcon
