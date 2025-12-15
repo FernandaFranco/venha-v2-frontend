@@ -41,7 +41,7 @@ export default function EventoDetalhes() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.id;
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
 
   const [event, setEvent] = useState(null);
   const [attendees, setAttendees] = useState([]);
@@ -202,20 +202,31 @@ export default function EventoDetalhes() {
         { withCredentials: true }
       );
 
-      message.success("Evento duplicado com sucesso!");
+      console.log("Resposta do duplicate:", response.data);
 
-      setTimeout(() => {
-        router.push(`/eventos/${response.data.event.id}`);
-      }, 1000);
+      if (response.data && response.data.event && response.data.event.id) {
+        message.success("Evento duplicado com sucesso!");
+
+        setTimeout(() => {
+          router.push(`/eventos/${response.data.event.id}`);
+        }, 1000);
+      } else {
+        // Se a resposta não tem o formato esperado, redirecionar para o dashboard
+        message.success("Evento duplicado! Redirecionando para o dashboard...");
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1000);
+      }
     } catch (err) {
       console.error("Erro ao duplicar evento:", err);
-      message.error("Erro ao duplicar evento");
+      const errorMsg = err.response?.data?.error || "Erro ao duplicar evento";
+      message.error(errorMsg);
     }
   };
 
   // Deletar evento
   const handleDeleteEvent = () => {
-    Modal.confirm({
+    modal.confirm({
       title: "Deletar Evento?",
       content: (
         <div>
@@ -237,7 +248,11 @@ export default function EventoDetalhes() {
           });
 
           message.success("Evento deletado com sucesso");
-          router.push("/dashboard");
+
+          // Usar window.location para forçar reload completo do dashboard
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 500);
         } catch (err) {
           console.error("Erro ao deletar evento:", err);
           message.error("Erro ao deletar evento");
