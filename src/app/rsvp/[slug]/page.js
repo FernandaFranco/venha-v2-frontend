@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import {
@@ -9,11 +9,10 @@ import {
   Input,
   InputNumber,
   Form,
-  message,
   Alert,
   Space,
-  Modal,
   Divider,
+  App,
 } from "antd";
 import {
   WhatsAppOutlined,
@@ -23,6 +22,10 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import {
+  validateWhatsApp,
+  formatWhatsApp,
+} from "../../utils/validators";
 import Logo from "../../components/Logo";
 
 const { TextArea } = Input;
@@ -30,8 +33,9 @@ const { TextArea } = Input;
 export default function ManageRSVPPage() {
   const params = useParams();
   const slug = params.slug;
+  const { message, modal } = App.useApp(); // Hook do Ant Design para mensagens e modals
 
-  const [step, setStep] = useState("search"); // 'search', 'found', 'modified', 'cancelled'
+  const [step, setStep] = useState("search"); // 'search', 'found', 'modified', 'cancelled', 'not_found'
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [searching, setSearching] = useState(false);
   const [attendee, setAttendee] = useState(null);
@@ -41,10 +45,29 @@ export default function ManageRSVPPage() {
 
   const [form] = Form.useForm();
 
+  // Preencher formulário quando attendee for carregado
+  useEffect(() => {
+    if (attendee && step === "found") {
+      form.setFieldsValue({
+        name: attendee.name,
+        num_adults: attendee.num_adults,
+        num_children: attendee.num_children,
+        comments: attendee.comments || "",
+      });
+    }
+  }, [attendee, step, form]);
+
   // Buscar RSVP
   const handleSearch = async () => {
     if (!whatsappNumber) {
       message.error("Por favor, informe seu WhatsApp");
+      return;
+    }
+
+    // Normalizar o número de WhatsApp
+    const normalizedNumber = validateWhatsApp(whatsappNumber);
+    if (!normalizedNumber) {
+      message.error("WhatsApp inválido. Use o formato: (21) 99999-9999 ou 5521999999999");
       return;
     }
 
@@ -55,26 +78,21 @@ export default function ManageRSVPPage() {
         "http://localhost:5000/api/attendees/find",
         {
           event_slug: slug,
-          whatsapp_number: whatsappNumber,
+          whatsapp_number: normalizedNumber,
         }
       );
 
       setAttendee(response.data.attendee);
       setEvent(response.data.event);
-
-      // Preencher formulário com dados atuais
-      form.setFieldsValue({
-        name: response.data.attendee.name,
-        num_adults: response.data.attendee.num_adults,
-        num_children: response.data.attendee.num_children,
-        comments: response.data.attendee.comments || "",
-      });
-
       setStep("found");
       message.success("Confirmação encontrada!");
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "RSVP não encontrado";
-      message.error(errorMsg);
+      if (err.response?.status === 404) {
+        setStep("not_found");
+      } else {
+        const errorMsg = err.response?.data?.error || "Erro ao buscar confirmação";
+        message.error(errorMsg);
+      }
     } finally {
       setSearching(false);
     }
@@ -84,10 +102,13 @@ export default function ManageRSVPPage() {
   const handleModify = async (values) => {
     setModifying(true);
 
+    // Normalizar o número de WhatsApp
+    const normalizedNumber = validateWhatsApp(whatsappNumber);
+
     try {
       await axios.put("http://localhost:5000/api/attendees/modify", {
         event_slug: slug,
-        whatsapp_number: whatsappNumber,
+        whatsapp_number: normalizedNumber,
         ...values,
       });
 
@@ -114,7 +135,10 @@ export default function ManageRSVPPage() {
 
   // Cancelar RSVP
   const handleCancel = () => {
-    Modal.confirm({
+    // Normalizar o número de WhatsApp
+    const normalizedNumber = validateWhatsApp(whatsappNumber);
+
+    modal.confirm({
       title: "Cancelar Confirmação?",
       content:
         "Tem certeza que deseja cancelar sua presença? O anfitrião será notificado.",
@@ -127,7 +151,7 @@ export default function ManageRSVPPage() {
         try {
           await axios.post("http://localhost:5000/api/attendees/cancel", {
             event_slug: slug,
-            whatsapp_number: whatsappNumber,
+            whatsapp_number: normalizedNumber,
           });
 
           message.success("Confirmação cancelada com sucesso");
@@ -149,7 +173,6 @@ export default function ManageRSVPPage() {
     setWhatsappNumber("");
     setAttendee(null);
     setEvent(null);
-    form.resetFields();
   };
 
   return (
@@ -174,12 +197,16 @@ export default function ManageRSVPPage() {
             <Space orientation="vertical" size="large" className="w-full">
               <Input
                 size="large"
-                placeholder="5521999999999"
+                placeholder="(21) 99999-9999 ou 5521999999999"
                 prefix={<WhatsAppOutlined />}
                 value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
+                onChange={(e) => {
+                  // Formatar automaticamente enquanto digita
+                  const formatted = formatWhatsApp(e.target.value);
+                  setWhatsappNumber(formatted);
+                }}
                 onPressEnter={handleSearch}
-                maxLength={15}
+                maxLength={20}
               />
 
               <Button
@@ -198,7 +225,7 @@ export default function ManageRSVPPage() {
 
             <Alert
               title="Dica"
-              description="Informe apenas os números do WhatsApp, sem espaços ou caracteres especiais. Exemplo: 5521999999999"
+              description="Você pode digitar o WhatsApp de várias formas: (21) 99999-9999, 21999999999 ou 5521999999999"
               type="info"
               showIcon
             />
@@ -391,6 +418,45 @@ export default function ManageRSVPPage() {
 
               <Button size="large" block onClick={handleSearchAgain}>
                 Gerenciar Outra Confirmação
+              </Button>
+            </Space>
+          </Card>
+        )}
+
+        {/* Step 5: Not Found */}
+        {step === "not_found" && (
+          <Card>
+            <Alert
+              title="Confirmação Não Encontrada"
+              description={`Não encontramos nenhuma confirmação com o WhatsApp ${whatsappNumber} para este evento.`}
+              type="warning"
+              showIcon
+              className="mb-6"
+            />
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                O que você pode fazer:
+              </h3>
+              <ul className="list-disc list-inside text-gray-600 space-y-2">
+                <li>Verifique se digitou o WhatsApp correto</li>
+                <li>Tente outro número de WhatsApp que você possa ter usado</li>
+                <li>Se ainda não confirmou presença, volte para o convite</li>
+              </ul>
+            </div>
+
+            <Space orientation="vertical" size="middle" className="w-full">
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={() => (window.location.href = `/invite/${slug}`)}
+              >
+                Voltar para o Convite
+              </Button>
+
+              <Button size="large" block onClick={handleSearchAgain}>
+                Tentar Outro WhatsApp
               </Button>
             </Space>
           </Card>

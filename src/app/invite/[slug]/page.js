@@ -10,12 +10,12 @@ import {
   Input,
   InputNumber,
   Form,
-  message,
   Divider,
   Tag,
   Space,
   Alert,
   Statistic,
+  App,
 } from "antd";
 import {
   CalendarOutlined,
@@ -47,6 +47,7 @@ const MapWithNoSSR = dynamic(() => import("../../components/EventMap"), {
 export default function ConvitePage() {
   const params = useParams();
   const slug = params.slug;
+  const { message } = App.useApp(); // Hook do Ant Design para mensagens
 
   const [event, setEvent] = useState(null);
   const [weather, setWeather] = useState(null);
@@ -208,10 +209,13 @@ export default function ConvitePage() {
   const handleSubmit = async (values) => {
     setSubmitting(true);
 
+    // Normalizar o número de WhatsApp para garantir formato consistente
+    const normalizedWhatsApp = validateWhatsApp(values.whatsapp_number);
+
     try {
       await axios.post("http://localhost:5000/api/attendees/rsvp", {
         event_slug: slug,
-        whatsapp_number: values.whatsapp_number,
+        whatsapp_number: normalizedWhatsApp,
         name: values.name,
         num_adults: values.num_adults || 1,
         num_children: values.num_children || 0,

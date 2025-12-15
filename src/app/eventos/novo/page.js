@@ -20,6 +20,7 @@ import {
   Switch,
   Alert,
   Card,
+  App,
 } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -34,8 +35,7 @@ dayjs.locale("pt-br");
 
 export default function NovoEvento() {
   const router = useRouter();
-
-  // ... (resto do código permanece igual até a parte do formulário)
+  const { message } = App.useApp(); // Hook do Ant Design para mensagens
 
   // State do formulário
   const [formData, setFormData] = useState({

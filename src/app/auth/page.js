@@ -4,6 +4,10 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import {
+  validateWhatsApp,
+  formatWhatsApp,
+} from "../utils/validators";
 import Logo from "../components/Logo";
 
 export default function AuthPage() {
@@ -23,10 +27,20 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    // Formatar WhatsApp automaticamente enquanto digita
+    if (name === "whatsapp_number") {
+      setFormData({
+        ...formData,
+        [name]: formatWhatsApp(value),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleLogin = async (e) => {
@@ -67,6 +81,14 @@ export default function AuthPage() {
     setError("");
     setMessage("");
 
+    // Normalizar o número de WhatsApp
+    const normalizedWhatsApp = validateWhatsApp(formData.whatsapp_number);
+    if (!normalizedWhatsApp) {
+      setError("WhatsApp inválido. Use o formato: (21) 99999-9999 ou 5521999999999");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/signup",
@@ -74,7 +96,7 @@ export default function AuthPage() {
           email: formData.email,
           password: formData.password,
           name: formData.name,
-          whatsapp_number: formData.whatsapp_number,
+          whatsapp_number: normalizedWhatsApp,
         },
         {
           withCredentials: true,
@@ -182,8 +204,12 @@ export default function AuthPage() {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="5521999999999"
+                  placeholder="(21) 99999-9999"
+                  maxLength={20}
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Formato aceito: (21) 99999-9999, 21999999999 ou 5521999999999
+                </p>
               </div>
             </>
           )}
