@@ -2,20 +2,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
-// Fix para ícones do Leaflet no Next.js
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+const mapContainerStyle = {
+  width: "100%",
+  height: "100%",
+};
 
-export default function EventMap({ address, latitude, longitude }) {
+const mapOptions = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  streetViewControl: true,
+  mapTypeControl: false,
+  fullscreenControl: true,
+};
+
+export default function EventMap({ address, latitude, longitude, eventTitle }) {
   const [coordinates, setCoordinates] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,26 +50,32 @@ export default function EventMap({ address, latitude, longitude }) {
     return null;
   }
 
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    console.error("❌ Google Maps API key não encontrada!");
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">
+        <p className="text-gray-500 text-sm">
+          Configuração do mapa não disponível
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <MapContainer
-      center={[coordinates.lat, coordinates.lng]}
-      zoom={15}
-      style={{ height: "100%", width: "100%" }}
-      scrollWheelZoom={true}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <Marker position={[coordinates.lat, coordinates.lng]}>
-        <Popup>
-          <div className="text-sm">
-            <strong>Local do Evento</strong>
-            <br />
-            {address}
-          </div>
-        </Popup>
-      </Marker>
-    </MapContainer>
+    <LoadScript googleMapsApiKey={apiKey}>
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        center={coordinates}
+        zoom={15}
+        options={mapOptions}
+      >
+        <Marker
+          position={coordinates}
+          title={eventTitle || "Local do Evento"}
+        />
+      </GoogleMap>
+    </LoadScript>
   );
 }
