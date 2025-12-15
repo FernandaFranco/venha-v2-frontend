@@ -57,10 +57,10 @@ export default function Dashboard() {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const [userResponse, eventsResponse] = await Promise.all([
-        axios.get("http://localhost:5000/api/auth/me", {
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
           withCredentials: true,
         }),
-        axios.get("http://localhost:5000/api/events/my-events", {
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/events/my-events`, {
           withCredentials: true,
         }),
       ]);
@@ -87,7 +87,7 @@ export default function Dashboard() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/auth/logout",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,
         {},
         { withCredentials: true }
       );

@@ -70,7 +70,7 @@ export default function EventoDetalhes() {
   const loadEventDetails = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/events/my-events`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/my-events`,
         { withCredentials: true }
       );
 
@@ -94,7 +94,7 @@ export default function EventoDetalhes() {
   const loadAttendees = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/events/${eventId}/attendees`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/attendees`,
         { withCredentials: true }
       );
       setAttendees(response.data.attendees);
@@ -119,7 +119,7 @@ export default function EventoDetalhes() {
   const exportCSV = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/events/${eventId}/export-csv`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/export-csv`,
         {
           withCredentials: true,
           responseType: "blob", // Importante para download de arquivo
@@ -158,7 +158,7 @@ export default function EventoDetalhes() {
   const handleSaveEdit = async () => {
     try {
       await axios.put(
-        `http://localhost:5000/api/events/${eventId}/attendees/${editingAttendee.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/attendees/${editingAttendee.id}`,
         editForm,
         { withCredentials: true }
       );
@@ -177,7 +177,7 @@ export default function EventoDetalhes() {
   const handleDelete = async (attendeeId) => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/events/${eventId}/attendees/${attendeeId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/attendees/${attendeeId}`,
         { withCredentials: true }
       );
 
@@ -203,7 +203,7 @@ export default function EventoDetalhes() {
   const handleDuplicateEvent = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/events/${eventId}/duplicate`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/duplicate`,
         {},
         { withCredentials: true }
       );
@@ -249,7 +249,7 @@ export default function EventoDetalhes() {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/events/${eventId}`, {
+          await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}`, {
             withCredentials: true,
           });
 

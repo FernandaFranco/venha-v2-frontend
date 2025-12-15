@@ -71,7 +71,7 @@ export default function ConvitePage() {
   const loadEvent = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/events/${slug}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${slug}`
       );
       setEvent(response.data.event);
     } catch (err) {
@@ -213,7 +213,7 @@ export default function ConvitePage() {
     const normalizedWhatsApp = validateWhatsApp(values.whatsapp_number);
 
     try {
-      await axios.post("http://localhost:5000/api/attendees/rsvp", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/attendees/rsvp`, {
         event_slug: slug,
         whatsapp_number: normalizedWhatsApp,
         name: values.name,

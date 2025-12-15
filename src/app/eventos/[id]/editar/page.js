@@ -49,7 +49,7 @@ export default function EditarEvento() {
   const loadEvent = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/events/my-events",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/my-events`,
         { withCredentials: true }
       );
 
@@ -93,7 +93,7 @@ export default function EditarEvento() {
     setSuccess("");
 
     try {
-      await axios.put(`http://localhost:5000/api/events/${eventId}`, formData, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}`, formData, {
         withCredentials: true,
       });
 

@@ -75,7 +75,7 @@ export default function ManageRSVPPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/attendees/find",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/attendees/find`,
         {
           event_slug: slug,
           whatsapp_number: normalizedNumber,
@@ -106,7 +106,7 @@ export default function ManageRSVPPage() {
     const normalizedNumber = validateWhatsApp(whatsappNumber);
 
     try {
-      await axios.put("http://localhost:5000/api/attendees/modify", {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/attendees/modify`, {
         event_slug: slug,
         whatsapp_number: normalizedNumber,
         ...values,
@@ -117,7 +117,7 @@ export default function ManageRSVPPage() {
 
       // Recarregar dados
       const response = await axios.post(
-        "http://localhost:5000/api/attendees/find",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/attendees/find`,
         {
           event_slug: slug,
           whatsapp_number: whatsappNumber,
@@ -149,7 +149,7 @@ export default function ManageRSVPPage() {
         setCancelling(true);
 
         try {
-          await axios.post("http://localhost:5000/api/attendees/cancel", {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/attendees/cancel`, {
             event_slug: slug,
             whatsapp_number: normalizedNumber,
           });

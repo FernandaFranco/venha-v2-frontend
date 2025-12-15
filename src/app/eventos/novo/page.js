@@ -233,7 +233,7 @@ export default function NovoEvento() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/events/create",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/create`,
         formData,
         { withCredentials: true }
       );

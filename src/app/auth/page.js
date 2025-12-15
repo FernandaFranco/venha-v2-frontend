@@ -51,7 +51,7 @@ export default function AuthPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           email: formData.email,
           password: formData.password,
@@ -91,7 +91,7 @@ export default function AuthPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/signup",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`,
         {
           email: formData.email,
           password: formData.password,
