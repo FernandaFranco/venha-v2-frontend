@@ -96,10 +96,10 @@ export default function ConvitePage() {
 
       console.log("🌤️ Buscando previsão do tempo para:", city);
 
-      const WEATHER_API_KEY = "141058784c6a4cb893930820251212";
+      const WEATHER_API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
 
-      if (!WEATHER_API_KEY || WEATHER_API_KEY === "SUA_CHAVE_WEATHERAPI") {
-        console.log("⚠️ API Key não configurada");
+      if (!WEATHER_API_KEY || WEATHER_API_KEY === "sua-chave-weatherapi-aqui") {
+        console.log("⚠️ API Key do WeatherAPI não configurada");
         return;
       }
 

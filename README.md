@@ -54,6 +54,7 @@ Edite `.env.local` e configure:
 ```bash
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=sua-chave-google-maps-aqui
 NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_WEATHER_API_KEY=sua-chave-weatherapi-aqui
 ```
 
 **Backend (../backend/.env):**
@@ -204,6 +205,19 @@ Chave de API do Google Maps para exibição de mapas.
 URL do backend da aplicação. Em desenvolvimento local, use `http://localhost:5000`.
 
 **Importante:** Esta variável começa com `NEXT_PUBLIC_` porque é acessada no navegador (client-side).
+
+### NEXT_PUBLIC_WEATHER_API_KEY
+
+Chave de API do WeatherAPI.com para exibição de previsão do tempo nos convites.
+
+**Como obter:**
+1. Acesse [WeatherAPI.com](https://www.weatherapi.com/)
+2. Crie uma conta gratuita (Free plan: 1 milhão de chamadas/mês)
+3. Vá em "My Account" → "API Keys"
+4. Copie a chave gerada
+5. Cole no arquivo `.env.local`
+
+**Limitações:** A versão gratuita fornece previsão de até 3 dias. Eventos com data superior a 3 dias no futuro não exibirão previsão do tempo.
 
 ## 🐳 Como Funciona o Docker
 
