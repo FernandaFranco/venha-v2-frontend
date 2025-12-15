@@ -68,7 +68,7 @@ export default function AuthPage() {
         router.push("/dashboard");
       }, 1000);
     } catch (err) {
-      setError(err.response?.data?.error || "Erro ao fazer login");
+      setError(err.response?.data?.message || err.response?.data?.error || "Erro ao fazer login");
       console.error("Erro:", err);
     } finally {
       setLoading(false);
@@ -110,7 +110,7 @@ export default function AuthPage() {
         router.push("/dashboard");
       }, 1000);
     } catch (err) {
-      setError(err.response?.data?.error || "Erro ao criar conta");
+      setError(err.response?.data?.message || err.response?.data?.error || "Erro ao criar conta");
       console.error("Erro:", err);
     } finally {
       setLoading(false);

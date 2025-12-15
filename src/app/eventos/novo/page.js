@@ -245,7 +245,7 @@ export default function NovoEvento() {
         router.push("/dashboard");
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.error || "Erro ao criar evento");
+      setError(err.response?.data?.message || err.response?.data?.error || "Erro ao criar evento");
       console.error("Erro:", err);
     } finally {
       setLoading(false);

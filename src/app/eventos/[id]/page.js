@@ -225,7 +225,7 @@ export default function EventoDetalhes() {
       }
     } catch (err) {
       console.error("Erro ao duplicar evento:", err);
-      const errorMsg = err.response?.data?.error || "Erro ao duplicar evento";
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || "Erro ao duplicar evento";
       message.error(errorMsg);
     }
   };

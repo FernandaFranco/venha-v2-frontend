@@ -103,7 +103,7 @@ export default function EditarEvento() {
         router.push(`/eventos/${eventId}`);
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || "Erro ao atualizar evento");
+      setError(err.response?.data?.message || err.response?.data?.error || "Erro ao atualizar evento");
       console.error("Erro:", err);
     } finally {
       setSubmitting(false);

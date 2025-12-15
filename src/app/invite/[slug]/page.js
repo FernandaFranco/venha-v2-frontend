@@ -226,9 +226,18 @@ export default function ConvitePage() {
       setRsvpSuccess(true);
       form.resetFields();
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.error || "Erro ao confirmar presença";
-      message.error(errorMsg);
+      const backendMsg = err.response?.data?.message || err.response?.data?.error;
+
+      // Mensagem específica para RSVP duplicado
+      if (backendMsg?.includes("already RSVP") || backendMsg?.includes("já confirmou")) {
+        message.warning({
+          content: "Você já confirmou presença neste evento. Para modificar ou cancelar sua confirmação, busque-a usando seu número de WhatsApp.",
+          duration: 6
+        });
+      } else {
+        const errorMsg = backendMsg || "Erro ao confirmar presença";
+        message.error(errorMsg);
+      }
       console.error("Erro:", err);
     } finally {
       setSubmitting(false);

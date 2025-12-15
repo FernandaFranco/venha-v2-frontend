@@ -90,7 +90,7 @@ export default function ManageRSVPPage() {
       if (err.response?.status === 404) {
         setStep("not_found");
       } else {
-        const errorMsg = err.response?.data?.error || "Erro ao buscar confirmação";
+        const errorMsg = err.response?.data?.message || err.response?.data?.error || "Erro ao buscar confirmação";
         message.error(errorMsg);
       }
     } finally {
@@ -120,12 +120,12 @@ export default function ManageRSVPPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/attendees/find`,
         {
           event_slug: slug,
-          whatsapp_number: whatsappNumber,
+          whatsapp_number: normalizedNumber,
         }
       );
       setAttendee(response.data.attendee);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Erro ao modificar RSVP";
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || "Erro ao modificar RSVP";
       message.error(errorMsg);
       console.error("Erro:", err);
     } finally {
@@ -157,7 +157,7 @@ export default function ManageRSVPPage() {
           message.success("Confirmação cancelada com sucesso");
           setStep("cancelled");
         } catch (err) {
-          const errorMsg = err.response?.data?.error || "Erro ao cancelar RSVP";
+          const errorMsg = err.response?.data?.message || err.response?.data?.error || "Erro ao cancelar RSVP";
           message.error(errorMsg);
           console.error("Erro:", err);
         } finally {
