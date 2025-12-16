@@ -268,7 +268,7 @@ export default function NovoEvento() {
     // Validações
     const errors = {};
 
-    if (!validateFutureDate(formData.event_date)) {
+    if (!validateFutureDate(formData.event_date, formData.start_time)) {
       errors.event_date = ERROR_MESSAGES.DATE_PAST;
     }
 

@@ -76,16 +76,27 @@ export function formatCEP(value) {
 }
 
 /**
- * Valida se data está no futuro
+ * Valida se data/hora está pelo menos 30 minutos no futuro
+ * @param {string} dateString - Data no formato YYYY-MM-DD
+ * @param {string} startTime - Hora no formato HH:mm (obrigatório)
+ * @returns {boolean} - true se válido
  */
-export function validateFutureDate(dateString) {
-  if (!dateString) return false;
+export function validateFutureDate(dateString, startTime) {
+  if (!dateString || !startTime) return false;
 
-  const date = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
 
-  return date >= today;
+  // Parsear data manualmente para evitar problemas de timezone
+  const [year, month, day] = dateString.split("-").map(Number);
+  const [hours, minutes] = startTime.split(":").map(Number);
+
+  // Criar data/hora do evento no fuso horário local
+  const eventDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
+  // Adiciona 30 minutos ao momento atual para criar o limite mínimo
+  const minDateTime = new Date(now.getTime() + 30 * 60 * 1000);
+
+  return eventDateTime >= minDateTime;
 }
 
 /**
@@ -111,7 +122,7 @@ export const ERROR_MESSAGES = {
     "WhatsApp inválido. Use o formato: (21) 99999-9999 ou 5521999999999",
   WHATSAPP_REQUIRED: "WhatsApp é obrigatório",
   CEP_INVALID: "CEP inválido. Use o formato: 00000-000",
-  DATE_PAST: "A data do evento deve ser no futuro",
+  DATE_PAST: "O evento deve ser agendado para pelo menos 30 minutos no futuro",
   TIME_INVALID: "Horário de término deve ser depois do horário de início",
   REQUIRED_FIELD: "Este campo é obrigatório",
   MIN_ADULTS: "Deve ter pelo menos 1 adulto",

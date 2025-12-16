@@ -12,11 +12,17 @@ import {
   Card,
   DatePicker,
   TimePicker,
+  App,
 } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import Logo from "../../../components/Logo";
 import { FormSkeleton } from "../../../components/LoadingSkeleton";
+import {
+  validateFutureDate,
+  validateTimeRange,
+  ERROR_MESSAGES,
+} from "../../../utils/validators";
 
 const { TextArea } = Input;
 
@@ -24,6 +30,7 @@ export default function EditarEvento() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.id;
+  const { message } = App.useApp();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -41,6 +48,7 @@ export default function EditarEvento() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     loadEvent();
@@ -88,6 +96,25 @@ export default function EditarEvento() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validações
+    const errors = {};
+
+    if (!validateFutureDate(formData.event_date, formData.start_time)) {
+      errors.event_date = ERROR_MESSAGES.DATE_PAST;
+    }
+
+    if (!validateTimeRange(formData.start_time, formData.end_time)) {
+      errors.end_time = ERROR_MESSAGES.TIME_INVALID;
+    }
+
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      message.error("Por favor, corrija os erros no formulário");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     setSuccess("");
@@ -222,10 +249,13 @@ export default function EditarEvento() {
                   placeholder="Selecione a data"
                   size="large"
                   className="w-full"
-                  disabledDate={(current) => {
-                    return current && current < dayjs().startOf("day");
-                  }}
+                  status={validationErrors.event_date ? "error" : ""}
                 />
+                {validationErrors.event_date && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {validationErrors.event_date}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -276,7 +306,13 @@ export default function EditarEvento() {
                   showNow={false}
                   needConfirm={false}
                   allowClear
+                  status={validationErrors.end_time ? "error" : ""}
                 />
+                {validationErrors.end_time && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {validationErrors.end_time}
+                  </p>
+                )}
               </div>
             </div>
 
