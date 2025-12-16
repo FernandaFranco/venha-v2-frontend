@@ -22,6 +22,20 @@ Este é o frontend do sistema Venha, desenvolvido em Next.js 16 com React. Forne
 - Previsão do tempo para a data do evento
 - Modificação e cancelamento de confirmação
 
+## 🏗️ Arquitetura da Aplicação
+
+O sistema Venha utiliza uma arquitetura de três camadas (Frontend, Backend API, Banco de Dados) com integração a múltiplas APIs externas.
+
+**Diagrama de Arquitetura Completo:** Consulte o arquivo [`../ARCHITECTURE.md`](../ARCHITECTURE.md) para visualizar o diagrama detalhado da arquitetura, fluxo de dados, decisões de design e integrações com serviços externos.
+
+**Visão Resumida:**
+- **Frontend (Next.js):** Interface web responsiva com SSR, páginas públicas (convites) e privadas (dashboard)
+- **Backend (Flask REST API):** Lógica de negócio, autenticação, validações e integrações
+- **Banco de Dados (SQLite):** Armazenamento de hosts, eventos e confirmações
+- **Serviços Externos:** SendGrid (emails), Google Maps/Geocoding (mapas), WeatherAPI (clima), ViaCEP (endereços)
+
+**Comunicação:** HTTP/REST com JSON, autenticação via session cookies, CORS configurado.
+
 ## 🛠️ Tecnologias Utilizadas
 
 - **Next.js 16** - Framework React com Turbopack
