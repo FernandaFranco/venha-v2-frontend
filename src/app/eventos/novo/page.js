@@ -9,7 +9,7 @@ import {
 } from "../../utils/validators";
 import { Tooltip } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import {
@@ -21,12 +21,19 @@ import {
   Alert,
   Card,
   App,
+  Spin,
 } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import "dayjs/locale/pt-br";
 import Logo from "../../components/Logo";
+import dynamic from "next/dynamic";
+
+// Importar mapa dinamicamente (só no client-side)
+const MapWithNoSSR = dynamic(() => import("../../components/EventMap"), {
+  ssr: false,
+});
 
 const { TextArea } = Input;
 
@@ -67,6 +74,11 @@ export default function NovoEvento() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+
+  // States para geocoding e mapa
+  const [mapCoordinates, setMapCoordinates] = useState(null);
+  const [loadingGeocode, setLoadingGeocode] = useState(false);
+  const [geocodeError, setGeocodeError] = useState("");
 
   // Buscar endereço pelo CEP
   const fetchAddress = async (cep) => {
@@ -198,6 +210,58 @@ export default function NovoEvento() {
     }));
   };
 
+  // Função para fazer geocoding do endereço
+  const geocodeAddress = useCallback(async (address) => {
+    if (!address) {
+      setMapCoordinates(null);
+      return;
+    }
+
+    setLoadingGeocode(true);
+    setGeocodeError("");
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/geocode`,
+        { address }
+      );
+
+      if (response.data.latitude && response.data.longitude) {
+        setMapCoordinates({
+          latitude: response.data.latitude,
+          longitude: response.data.longitude,
+        });
+        setGeocodeError("");
+      } else {
+        setMapCoordinates(null);
+        setGeocodeError(
+          response.data.message ||
+            "Não foi possível localizar o endereço no mapa"
+        );
+      }
+    } catch (err) {
+      console.error("Erro ao geocodificar:", err);
+      setMapCoordinates(null);
+      setGeocodeError("Erro ao buscar localização no mapa");
+    } finally {
+      setLoadingGeocode(false);
+    }
+  }, []);
+
+  // Effect para geocodificar quando o endereço completo mudar (com debounce)
+  useEffect(() => {
+    if (!formData.address_full) {
+      setMapCoordinates(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      geocodeAddress(formData.address_full);
+    }, 800); // Debounce de 800ms
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.address_full, geocodeAddress]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -245,7 +309,11 @@ export default function NovoEvento() {
         router.push("/dashboard");
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.error || "Erro ao criar evento");
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Erro ao criar evento"
+      );
       console.error("Erro:", err);
     } finally {
       setLoading(false);
@@ -609,6 +677,48 @@ export default function NovoEvento() {
                 </>
               )}
             </Card>
+
+            {/* Mapa - Preview da Localização */}
+            {formData.address_full && (
+              <Card
+                title="Localização no Mapa"
+                className="mb-6"
+                styles={{ body: { padding: "24px" } }}
+              >
+                {loadingGeocode ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Spin size="large" />
+                    <span className="ml-3 text-gray-600">
+                      Buscando localização...
+                    </span>
+                  </div>
+                ) : geocodeError ? (
+                  <Alert
+                    title="Aviso"
+                    description={geocodeError}
+                    type="warning"
+                    showIcon
+                  />
+                ) : mapCoordinates ? (
+                  <>
+                    <Alert
+                      title="Localização encontrada!"
+                      description="Confirme se o marcador está no local correto do evento."
+                      type="success"
+                      showIcon
+                      className="mb-4"
+                    />
+                    <div style={{ height: "300px" }}>
+                      <MapWithNoSSR
+                        address={formData.address_full}
+                        latitude={mapCoordinates.latitude}
+                        longitude={mapCoordinates.longitude}
+                      />
+                    </div>
+                  </>
+                ) : null}
+              </Card>
+            )}
 
             {/* Permissões com Switch */}
             <Card

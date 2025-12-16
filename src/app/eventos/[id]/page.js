@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import axios from "axios";
 import {
   Button,
@@ -26,22 +25,17 @@ import {
   DeleteOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
+  EnvironmentOutlined,
   UserOutlined,
   SmileOutlined,
   TeamOutlined,
   CopyOutlined as DuplicateOutlined,
-  EnvironmentOutlined,
 } from "@ant-design/icons";
 import { EventDetailsSkeleton } from "../../components/LoadingSkeleton";
 import { formatDateBR } from "../../utils/dateUtils";
 import Logo from "../../components/Logo";
 
 const { Text } = Typography;
-
-// Importar mapa dinamicamente (só no client-side)
-const MapWithNoSSR = dynamic(() => import("../../components/EventMap"), {
-  ssr: false,
-});
 
 export default function EventoDetalhes() {
   const params = useParams();
@@ -408,36 +402,6 @@ export default function EventoDetalhes() {
             )}
           </div>
         </div>
-
-        {/* Endereço e Mapa */}
-        {event.address_full && event.latitude && event.longitude && (
-          <Card className="mb-6" title="Localização do Evento">
-            <div className="space-y-4">
-              <div>
-                <Text strong>Endereço:</Text>
-                <br />
-                <Text>{event.address_full}</Text>
-              </div>
-              <div className="h-80 rounded-lg overflow-hidden">
-                <MapWithNoSSR
-                  latitude={event.latitude}
-                  longitude={event.longitude}
-                  eventTitle={event.title}
-                />
-              </div>
-              <div>
-                <Button
-                  type="link"
-                  icon={<EnvironmentOutlined />}
-                  href={`https://www.google.com/maps?q=${event.latitude},${event.longitude}`}
-                  target="_blank"
-                >
-                  Abrir no Google Maps
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
 
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

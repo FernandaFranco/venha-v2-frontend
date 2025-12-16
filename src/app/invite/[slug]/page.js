@@ -378,6 +378,28 @@ END:VCALENDAR`;
             </div>
           </div>
 
+          {/* Anfitrião */}
+          {event.host_name && (
+            <div className="flex items-start mb-6">
+              <UserOutlined className="text-indigo-600 text-xl mr-3 mt-1" />
+              <div className="flex-1">
+                <p className="text-gray-500 text-sm">Anfitrião</p>
+                <p className="text-gray-900 font-medium">{event.host_name}</p>
+                {event.host_whatsapp && (
+                  <a
+                    href={`https://wa.me/${event.host_whatsapp.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 text-sm mt-1"
+                  >
+                    <WhatsAppOutlined />
+                    Entrar em contato
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Botão de adicionar ao calendário */}
           <Button
             icon={<DownloadOutlined />}
