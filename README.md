@@ -24,17 +24,41 @@ Este é o frontend do sistema Venha, desenvolvido em Next.js 16 com React. Forne
 
 ## 🏗️ Arquitetura da Aplicação
 
-O sistema Venha utiliza uma arquitetura de três camadas (Frontend, Backend API, Banco de Dados) com integração a múltiplas APIs externas.
+```mermaid
+graph LR
+    A[Frontend<br/>Next.js] <-->|REST/JSON| B[Backend<br/>Flask API]
+    B --> C[(Database<br/>SQLite)]
 
-**Diagrama de Arquitetura Completo:** Consulte o arquivo [`ARCHITECTURE.md`](../backend/ARCHITECTURE.md) no repositório do backend para visualizar o diagrama detalhado da arquitetura, fluxo de dados e integrações com serviços externos.
+    A -.->|REST| D[ViaCEP]
+    A -.->|REST| E[Google Maps API]
+    A -.->|REST| F[WeatherAPI]
 
-**Visão Resumida:**
-- **Frontend (Next.js):** Interface web responsiva com SSR, páginas públicas (convites) e privadas (dashboard)
-- **Backend (Flask REST API):** Lógica de negócio, autenticação, validações e integrações
-- **Banco de Dados (SQLite):** Armazenamento de hosts, eventos e confirmações
-- **Serviços Externos:** Google Maps/Geocoding (mapas), WeatherAPI (clima), ViaCEP (endereços)
+    B -.->|REST| G[Google Geocoding API]
+    B -.->|REST<br/>fallback| H[Nominatim OSM]
 
-**Comunicação:** HTTP/REST com JSON, autenticação via session cookies, CORS configurado.
+    style A fill:#b3e0ff,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#b3e0ff,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#b3e0ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
+```
+
+**Legenda:**
+- **Linha contínua (←→):** Comunicação obrigatória
+- **Linha tracejada (- -):** Comunicação opcional ou fallback
+- **Azul:** Módulos implementados no projeto
+- **Amarelo:** APIs e serviços externos
+
+**Componentes:**
+- **Frontend (Next.js):** Interface web responsiva, páginas públicas e privadas, autenticação via session cookies
+- **Backend (Flask):** API REST com lógica de negócio, validações, documentação Swagger automática
+- **Database (SQLite):** Armazenamento de hosts, eventos e confirmações (RSVPs)
+- **APIs Externas Frontend:** ViaCEP (endereços), Google Maps (mapas), WeatherAPI (clima)
+- **APIs Externas Backend:** Google Geocoding (coordenadas) com fallback Nominatim
+- **Notificações:** Emails simulados no console (sem envio real)
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -192,8 +216,6 @@ NEXT_PUBLIC_WEATHER_API_KEY=sua-chave-weatherapi-aqui
 3. Vá em "My Account" → "API Keys"
 4. Copie a chave gerada
 
-**Nota sobre APIs Externas:** As chaves de API serão compartilhadas separadamente para fins de avaliação. Não inclua chaves reais no código versionado.
-
 ### Passo 4: Rodar com Docker Compose
 
 Certifique-se de estar na pasta `frontend/` (onde está o `docker-compose.yml`):
@@ -217,7 +239,7 @@ docker-compose up --build
 Aguarde até ver as mensagens indicando que os serviços estão prontos. Então acesse:
 
 - **Frontend (Interface):** http://localhost:3000
-- **Backend API:** http://localhost:5000
+- **Backend API:** http://localhost:5000 (redireciona automaticamente para a documentação Swagger)
 - **Documentação Swagger:** http://localhost:5000/api/docs
 
 ### Comandos Úteis do Docker
@@ -495,8 +517,8 @@ docker-compose up --build --force-recreate
 
 ### 📚 Documentação Adicional
 
-- **Arquitetura Completa:** Veja `ARCHITECTURE.md` para diagrama detalhado (disponível tanto no frontend quanto no backend)
-- **API REST:** http://localhost:5000/api/docs para documentação Swagger interativa do backend
+- **Diagrama de Arquitetura:** Consulte a seção "🏗️ Arquitetura da Aplicação" no início deste README
+- **API REST:** http://localhost:5000/api/docs para documentação Swagger interativa do backend (http://localhost:5000 redireciona automaticamente)
 - **Código Fonte Frontend:** Componentes React em `src/app/components/`, páginas em `src/app/`
 - **Código Fonte Backend:** Todas as rotas e endpoints estão implementados em `app.py`
 
