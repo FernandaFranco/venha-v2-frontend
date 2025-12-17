@@ -53,24 +53,36 @@ frontend/
 ├── src/
 │   └── app/
 │       ├── components/          # Componentes React reutilizáveis
-│       │   ├── EventMap.js     # Mapa do Google
-│       │   └── WeatherWidget.js # Widget de clima
-│       ├── dashboard/           # Páginas do dashboard do anfitrião
+│       │   ├── EventMap.js     # Mapa do Google Maps
+│       │   ├── ErrorBoundary.js # Tratamento de erros
+│       │   ├── LoadingSkeleton.js # Estados de carregamento
+│       │   └── Logo.js         # Logo da aplicação
+│       ├── auth/                # Página de autenticação (login/signup)
 │       │   └── page.js
+│       ├── dashboard/           # Dashboard do anfitrião
+│       │   └── page.js
+│       ├── eventos/             # Gerenciamento de eventos
+│       │   ├── [id]/
+│       │   │   ├── page.js     # Visualizar evento
+│       │   │   └── editar/page.js # Editar evento
+│       │   └── novo/page.js    # Criar novo evento
 │       ├── invite/[slug]/       # Página pública do convite
 │       │   └── page.js
-│       ├── login/               # Página de login
-│       │   └── page.js
-│       ├── rsvp/[slug]/        # Página de gerenciamento de RSVP
-│       │   └── page.js
-│       ├── signup/              # Página de cadastro
+│       ├── rsvp/[slug]/        # Gerenciamento de RSVP do convidado
 │       │   └── page.js
 │       ├── layout.js            # Layout principal
-│       └── page.js              # Página inicial
+│       └── page.js              # Página inicial (redireciona para /dashboard ou /auth)
 ├── public/                      # Arquivos estáticos
 ├── docker-compose.yml           # Configuração Docker Compose
 ├── Dockerfile                   # Dockerfile do frontend
+├── package.json                 # Dependências do projeto
+├── package-lock.json            # Lock de versões das dependências
+├── next.config.mjs              # Configuração do Next.js
+├── postcss.config.mjs           # Configuração do PostCSS
+├── jsconfig.json                # Configuração JavaScript
+├── eslint.config.mjs            # Configuração do ESLint
 ├── .env.local.example           # Template de variáveis de ambiente
+├── .gitignore                   # Arquivos ignorados pelo Git
 └── README.md                    # Este arquivo
 ```
 
@@ -289,7 +301,7 @@ O frontend integra-se com as seguintes APIs externas:
 - Licença: Proprietária
 
 **Uso no Frontend:**
-- Componente: `src/app/components/WeatherWidget.js`
+- Página: `src/app/invite/[slug]/page.js` (implementado diretamente na página do convite)
 - Funcionalidade: Exibir temperatura, condição climática e ícone do tempo
 - Limitação: Apenas eventos com data até 3 dias no futuro exibirão previsão
 
@@ -392,6 +404,10 @@ Este projeto foi desenvolvido como parte da Sprint de Arquitetura de Software da
 
 ### Fluxo de Teste Sugerido
 
+**Comportamento da Página Inicial:** Ao acessar http://localhost:3000, você será automaticamente redirecionado:
+- Para `/dashboard` se já estiver autenticado
+- Para `/auth` (autenticação) se não estiver autenticado
+
 1. **Criar Conta:** Acesse http://localhost:3000 e crie uma conta de anfitrião
 2. **Criar Evento:** No dashboard, crie um evento de teste
    - Use um CEP válido (ex: 22040-020 - Copacabana, Rio de Janeiro)
@@ -479,9 +495,10 @@ docker-compose up --build --force-recreate
 
 ### 📚 Documentação Adicional
 
-- **Arquitetura Completa:** Veja `ARCHITECTURE.md` (backend) para diagrama detalhado da arquitetura do sistema
-- **API REST:** http://localhost:5000/api/docs para documentação Swagger interativa
-- **Código Fonte:** Todos os componentes React estão em `src/app/components/`
+- **Arquitetura Completa:** Veja `ARCHITECTURE.md` para diagrama detalhado (disponível tanto no frontend quanto no backend)
+- **API REST:** http://localhost:5000/api/docs para documentação Swagger interativa do backend
+- **Código Fonte Frontend:** Componentes React em `src/app/components/`, páginas em `src/app/`
+- **Código Fonte Backend:** Todas as rotas e endpoints estão implementados em `app.py`
 
 ## 📄 Licença
 
