@@ -26,13 +26,13 @@ Este é o frontend do sistema Venha, desenvolvido em Next.js 16 com React. Forne
 
 O sistema Venha utiliza uma arquitetura de três camadas (Frontend, Backend API, Banco de Dados) com integração a múltiplas APIs externas.
 
-**Diagrama de Arquitetura Completo:** Consulte o arquivo [`ARCHITECTURE.md`](ARCHITECTURE.md) para visualizar o diagrama detalhado da arquitetura, fluxo de dados, decisões de design e integrações com serviços externos.
+**Diagrama de Arquitetura Completo:** Consulte o arquivo [`ARCHITECTURE.md`](../backend/ARCHITECTURE.md) no repositório do backend para visualizar o diagrama detalhado da arquitetura, fluxo de dados e integrações com serviços externos.
 
 **Visão Resumida:**
 - **Frontend (Next.js):** Interface web responsiva com SSR, páginas públicas (convites) e privadas (dashboard)
 - **Backend (Flask REST API):** Lógica de negócio, autenticação, validações e integrações
 - **Banco de Dados (SQLite):** Armazenamento de hosts, eventos e confirmações
-- **Serviços Externos:** SendGrid (emails), Google Maps/Geocoding (mapas), WeatherAPI (clima), ViaCEP (endereços)
+- **Serviços Externos:** Google Maps/Geocoding (mapas), WeatherAPI (clima), ViaCEP (endereços)
 
 **Comunicação:** HTTP/REST com JSON, autenticação via session cookies, CORS configurado.
 
@@ -45,130 +45,6 @@ O sistema Venha utiliza uma arquitetura de três camadas (Frontend, Backend API,
 - **Google Maps API** - Visualização de mapas
 - **WeatherAPI** - Previsão do tempo
 - **Tailwind CSS** - Estilização
-
-## 🚀 Como Rodar o Projeto
-
-### Opção 1: Usando Docker (Recomendado)
-
-Esta é a forma mais fácil de rodar o projeto completo (frontend + backend).
-
-#### Pré-requisitos
-- Docker Desktop instalado e rodando
-- Arquivo `.env` configurado no backend
-- Arquivo `.env.local` configurado no frontend
-
-#### Passo 1: Configurar Variáveis de Ambiente
-
-**Frontend (.env.local):**
-```bash
-cp .env.local.example .env.local
-```
-
-Edite `.env.local` e configure:
-```bash
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=sua-chave-google-maps-aqui
-NEXT_PUBLIC_API_URL=http://localhost:5000
-NEXT_PUBLIC_WEATHER_API_KEY=sua-chave-weatherapi-aqui
-```
-
-**Backend (../backend/.env):**
-Certifique-se de que o backend tem o arquivo `.env` configurado. Veja instruções no README do backend.
-
-#### Passo 2: Rodar com Docker Compose
-
-```bash
-docker-compose up --build
-```
-
-Aguarde o build das imagens (pode levar alguns minutos na primeira vez).
-
-#### Passo 3: Acessar a Aplicação
-
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:5000
-- **Documentação Swagger:** http://localhost:5000/api/docs
-
-#### Comandos Úteis do Docker
-
-**Ver logs em tempo real:**
-```bash
-docker-compose logs -f
-```
-
-**Ver logs apenas do frontend:**
-```bash
-docker-compose logs -f frontend
-```
-
-**Ver logs apenas do backend:**
-```bash
-docker-compose logs -f backend
-```
-
-**Parar os containers:**
-```bash
-docker-compose down
-```
-
-**Reiniciar apenas o frontend:**
-```bash
-docker restart venha_frontend
-```
-
-**Reiniciar apenas o backend:**
-```bash
-docker restart venha_backend
-```
-
-**Acessar o terminal dentro do container:**
-```bash
-docker exec -it venha_frontend sh
-docker exec -it venha_backend bash
-```
-
-### Opção 2: Desenvolvimento Local (sem Docker)
-
-Se preferir rodar sem Docker, siga estas instruções:
-
-#### Pré-requisitos
-- Node.js 20 ou superior
-- npm ou yarn
-- Backend rodando em http://localhost:5000
-
-#### Passo 1: Instalar Dependências
-
-```bash
-npm install
-```
-
-#### Passo 2: Configurar Variáveis de Ambiente
-
-```bash
-cp .env.local.example .env.local
-```
-
-Edite `.env.local` com suas chaves de API.
-
-#### Passo 3: Rodar em Modo Desenvolvimento
-
-```bash
-npm run dev
-```
-
-A aplicação estará disponível em http://localhost:3000
-
-#### Outros Comandos
-
-**Build para produção:**
-```bash
-npm run build
-npm start
-```
-
-**Verificar erros de linting:**
-```bash
-npm run lint
-```
 
 ## 📁 Estrutura do Projeto
 
@@ -195,334 +71,416 @@ frontend/
 ├── docker-compose.yml           # Configuração Docker Compose
 ├── Dockerfile                   # Dockerfile do frontend
 ├── .env.local.example           # Template de variáveis de ambiente
-├── .env.local                   # Variáveis de ambiente (não versionado)
-├── package.json                 # Dependências npm
 └── README.md                    # Este arquivo
 ```
 
-## 🔑 Variáveis de Ambiente
+## 🚀 Como Rodar o Projeto (Docker)
 
-### NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+Esta é a forma recomendada de rodar o projeto completo (frontend + backend). Este método garante que todas as dependências sejam instaladas corretamente e que ambos os serviços se comuniquem adequadamente.
 
-Chave de API do Google Maps para exibição de mapas.
+### Pré-requisitos
+- Docker Desktop instalado e rodando
+- Git instalado
+- Conexão com internet para download de dependências
 
-**Como obter:**
+### Passo 1: Clonar os Repositórios
+
+Crie um diretório pai e clone ambos os projetos:
+
+```bash
+mkdir venha_project
+cd venha_project
+git clone https://github.com/FernandaFranco/rsvp_app_api.git backend
+git clone https://github.com/FernandaFranco/rsvp_app_front_end.git frontend
+```
+
+**Importante:** Os comandos acima clonam os repositórios nas pastas `backend` e `frontend` respectivamente, que são os nomes esperados pelo Docker Compose.
+
+**Estrutura de diretórios esperada:**
+```
+venha_project/
+├── backend/    (repositório do backend)
+│   ├── app.py
+│   ├── .env.example
+│   ├── Dockerfile
+│   └── ...
+└── frontend/   (este repositório)
+    ├── docker-compose.yml
+    ├── .env.local.example
+    ├── Dockerfile
+    └── ...
+```
+
+### Passo 2: Configurar Backend (.env)
+
+Primeiro, configure o backend:
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Edite o arquivo `backend/.env`:
+
+```bash
+# Obrigatórias
+FLASK_APP=app.py
+FLASK_ENV=development
+SECRET_KEY=sua-chave-secreta-aqui    # Gere com: python3 -c "import secrets; print(secrets.token_hex(32))"
+DATABASE_URL=sqlite:///invitations.db
+
+# Opcional - Google Geocoding (usa Nominatim como fallback)
+GOOGLE_GEOCODING_API_KEY=sua-chave-google-aqui
+
+# Frontend URL
+FRONTEND_URL=http://localhost:3000
+```
+
+**Gere o SECRET_KEY:**
+```bash
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Veja o README do backend para instruções completas.
+
+### Passo 3: Configurar Frontend (.env.local)
+
+Agora configure o frontend:
+
+```bash
+cd ../frontend
+cp .env.local.example .env.local
+```
+
+Edite o arquivo `.env.local`:
+
+```bash
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=sua-chave-google-maps-aqui
+NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_WEATHER_API_KEY=sua-chave-weatherapi-aqui
+```
+
+**APIs Necessárias:**
+- **NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:** Chave do Google Maps JavaScript API (obrigatória para mapas)
+- **NEXT_PUBLIC_API_URL:** URL do backend (use `http://localhost:5000`)
+- **NEXT_PUBLIC_WEATHER_API_KEY:** Chave do WeatherAPI.com (obrigatória para previsão do tempo)
+
+**Como obter as chaves:**
+
+**Google Maps API:**
 1. Acesse [Google Cloud Console](https://console.cloud.google.com)
-2. Crie um novo projeto ou selecione um existente
+2. Crie um projeto ou selecione um existente
 3. Ative a API "Maps JavaScript API"
 4. Vá em "Credenciais" → "Criar credenciais" → "Chave de API"
 5. Copie a chave gerada
-6. (Opcional) Configure restrições de domínio para segurança
 
-### NEXT_PUBLIC_API_URL
-
-URL do backend da aplicação. Em desenvolvimento local, use `http://localhost:5000`.
-
-**Importante:** Esta variável começa com `NEXT_PUBLIC_` porque é acessada no navegador (client-side).
-
-### NEXT_PUBLIC_WEATHER_API_KEY
-
-Chave de API do WeatherAPI.com para exibição de previsão do tempo nos convites.
-
-**Como obter:**
+**WeatherAPI:**
 1. Acesse [WeatherAPI.com](https://www.weatherapi.com/)
-2. Crie uma conta gratuita (Free plan: 1 milhão de chamadas/mês)
+2. Crie uma conta gratuita (1 milhão de chamadas/mês grátis)
 3. Vá em "My Account" → "API Keys"
 4. Copie a chave gerada
-5. Cole no arquivo `.env.local`
 
-**Limitações:** A versão gratuita fornece previsão de até 3 dias. Eventos com data superior a 3 dias no futuro não exibirão previsão do tempo.
+**Nota sobre APIs Externas:** As chaves de API serão compartilhadas separadamente para fins de avaliação. Não inclua chaves reais no código versionado.
+
+### Passo 4: Rodar com Docker Compose
+
+Certifique-se de estar na pasta `frontend/` (onde está o `docker-compose.yml`):
+
+```bash
+docker-compose up --build
+```
+
+**O que acontece:**
+- O Docker baixa as imagens base necessárias
+- Instala todas as dependências do backend (Python/Flask)
+- Instala todas as dependências do frontend (Next.js)
+- Inicia ambos os serviços
+- Backend fica disponível na porta 5000
+- Frontend fica disponível na porta 3000
+
+**Primeira execução:** Pode levar alguns minutos para baixar imagens e instalar tudo.
+
+### Passo 5: Acessar a Aplicação
+
+Aguarde até ver as mensagens indicando que os serviços estão prontos. Então acesse:
+
+- **Frontend (Interface):** http://localhost:3000
+- **Backend API:** http://localhost:5000
+- **Documentação Swagger:** http://localhost:5000/api/docs
+
+### Comandos Úteis do Docker
+
+**Ver logs em tempo real:**
+```bash
+docker-compose logs -f
+```
+
+**Ver logs apenas do frontend:**
+```bash
+docker-compose logs -f frontend
+```
+
+**Ver logs apenas do backend:**
+```bash
+docker-compose logs -f backend
+```
+
+**Parar containers (mantém os dados):**
+```bash
+docker-compose down
+```
+
+**Parar e remover volumes (limpa o banco de dados):**
+```bash
+docker-compose down -v
+```
+
+**Reiniciar apenas o frontend:**
+```bash
+docker restart venha_frontend
+```
+
+**Acessar terminal do container:**
+```bash
+docker exec -it venha_frontend sh
+docker exec -it venha_backend bash
+```
+
+**Reconstruir do zero (se houver problemas):**
+```bash
+docker-compose down -v
+docker-compose up --build --force-recreate
+```
 
 ## 🌐 APIs Externas
 
-O sistema Venha integra-se com **4 APIs externas** para fornecer funcionalidades completas. Abaixo está a documentação detalhada de cada integração:
+O frontend integra-se com as seguintes APIs externas:
 
 ### 1. Google Maps JavaScript API
 
 **URL:** https://developers.google.com/maps/documentation/javascript
 
-**Propósito:** Exibição de mapas interativos nas páginas de convite e criação de eventos, permitindo que convidados visualizem a localização exata do evento.
+**Propósito:** Exibição de mapas interativos nas páginas de convite.
 
 **Licença/Custo:**
 - Plano gratuito com crédito mensal de $200 USD
-- Primeiras 28.000 carregamentos de mapa dinâmico/mês são gratuitos
-- Cobrança baseada em uso acima do limite gratuito
+- Primeiras 28.000 carregamentos de mapa/mês são gratuitos
 - Licença: Proprietária (Google)
 
-**Registro:**
-1. Criar conta no [Google Cloud Console](https://console.cloud.google.com)
-2. Criar ou selecionar um projeto
-3. Ativar a API "Maps JavaScript API"
-4. Criar credenciais (Chave de API)
-5. (Recomendado) Configurar restrições de domínio/aplicativo
-
 **Uso no Frontend:**
-- Componente: [src/app/components/EventMap.js](src/app/components/EventMap.js)
+- Componente: `src/app/components/EventMap.js`
 - Biblioteca: `@react-google-maps/api`
-- Funcionalidade: Renderização de mapa com marcador na localização do evento
-- Páginas que utilizam: `/invite/[slug]` (página do convite), `/eventos/novo` (validação de endereço)
+- Páginas: `/invite/[slug]` (página do convite)
 
-**Endpoints/Features utilizados:**
-- Maps JavaScript API para renderização de mapas
-- Marker API para posicionamento de marcadores
-
----
+**Endpoints utilizados:**
+- Google Maps JavaScript API (carregada via script tag)
+  - URL: `https://maps.googleapis.com/maps/api/js`
+  - Parâmetros: `key` (API key), `libraries=places`
 
 ### 2. WeatherAPI
 
 **URL:** https://www.weatherapi.com/
 
-**Propósito:** Exibição de previsão do tempo na página do convite, mostrando as condições climáticas esperadas para a data do evento.
+**Propósito:** Exibição de previsão do tempo na página do convite.
 
 **Licença/Custo:**
 - Plano gratuito: 1.000.000 chamadas/mês
 - Previsão até 3 dias no futuro (plano gratuito)
-- Planos pagos disponíveis para previsões mais longas
 - Licença: Proprietária
 
-**Registro:**
-1. Acessar [WeatherAPI.com](https://www.weatherapi.com/)
-2. Criar conta gratuita
-3. Acessar "My Account" → "API Keys"
-4. Copiar a chave gerada
-
 **Uso no Frontend:**
-- Componente: [src/app/components/WeatherWidget.js](src/app/components/WeatherWidget.js)
-- Biblioteca: `axios` para requisições HTTP
+- Componente: `src/app/components/WeatherWidget.js`
 - Funcionalidade: Exibir temperatura, condição climática e ícone do tempo
-- Páginas que utilizam: `/invite/[slug]` (página do convite)
+- Limitação: Apenas eventos com data até 3 dias no futuro exibirão previsão
 
 **Endpoints utilizados:**
-- `GET /v1/forecast.json` - Previsão do tempo para uma data específica
-  - Parâmetros: `key`, `q` (coordenadas lat,lon), `dt` (data do evento), `lang=pt`
-
-**Limitações:**
-- Apenas eventos com data até 3 dias no futuro exibirão previsão (limitação do plano gratuito)
-- Requer coordenadas geográficas (obtidas via Google Geocoding no backend)
-
----
+- `GET https://api.weatherapi.com/v1/forecast.json`
+  - Parâmetros: `key` (API key), `q` (lat,lng), `days=1`, `lang=pt`
+  - Retorna: `forecast.forecastday[0].day` (temperatura, condição, ícone)
 
 ### 3. Google Geocoding API (via Backend)
 
 **URL:** https://developers.google.com/maps/documentation/geocoding
 
-**Propósito:** Conversão de endereços completos em coordenadas geográficas (latitude/longitude) para exibição em mapas e previsão do tempo.
+**Propósito:** Conversão de endereços em coordenadas geográficas (latitude/longitude).
 
 **Licença/Custo:**
 - Integrado ao mesmo plano do Google Maps
-- Plano gratuito com crédito mensal de $200 USD
 - Primeiras 40.000 requisições/mês são gratuitas
-- Licença: Proprietária (Google)
-
-**Registro:**
-- Mesma configuração do Google Maps (mesma chave de API pode ser usada)
-- Ativar "Geocoding API" no Google Cloud Console
 
 **Uso:**
 - **Backend:** Converte endereços em coordenadas ao criar eventos
-- **Frontend:** Solicita geocoding em tempo real durante criação de evento para validação
+- **Fallback:** Usa Nominatim (OpenStreetMap) se Google Geocoding falhar
 
-**Endpoints utilizados (via Backend):**
-- Backend expõe: `POST /api/events/geocode` que internamente chama Google Geocoding API
-- Fallback: Usa Nominatim (OpenStreetMap) se Google Geocoding falhar
-
----
+**Endpoints utilizados:**
+- `GET https://maps.googleapis.com/maps/api/geocode/json` (chamado pelo backend)
+  - Parâmetros: `address`, `key`
+  - Retorna: `results[0].geometry.location` (lat, lng)
 
 ### 4. ViaCEP
 
 **URL:** https://viacep.com.br/
 
-**Propósito:** Busca automática de endereços brasileiros a partir do CEP, facilitando o preenchimento de formulários de evento.
+**Propósito:** Busca automática de endereços brasileiros a partir do CEP.
 
 **Licença/Custo:**
 - API pública e completamente gratuita
 - Sem necessidade de registro ou chave de API
-- Sem limites de requisições documentados oficialmente
 - Licença: Livre (domínio público)
 
-**Registro:**
-- Não requer registro ou autenticação
-
 **Uso no Frontend:**
-- Arquivos: [src/app/eventos/novo/page.js](src/app/eventos/novo/page.js), [src/app/eventos/[id]/editar/page.js](src/app/eventos/[id]/editar/page.js)
-- Funcionalidade: Busca automática de endereço ao digitar CEP
 - Chamada: **Direta do frontend** (não passa pelo backend)
+- Funcionalidade: Busca automática de endereço ao digitar CEP
+- Validação: CEP deve ter exatamente 8 dígitos
 
-**Endpoint externo utilizado:**
+**Endpoints utilizados:**
 - `GET https://viacep.com.br/ws/{cep}/json/`
-  - Retorna: `logradouro`, `complemento`, `bairro`, `localidade`, `uf`, `cep`
+  - Parâmetros: `cep` (8 dígitos, apenas números)
+  - Retorna: `logradouro`, `bairro`, `localidade`, `uf`
 
-**Implementação:**
-```javascript
-const response = await axios.get(
-  `https://viacep.com.br/ws/${cleanCep}/json/`
-);
+## 📧 Notificações por Email - Modo Simulação
+
+O sistema **não envia emails reais**. Quando um convidado confirma, modifica ou cancela presença, o backend **imprime o conteúdo do email no console**.
+
+**Para ver os emails simulados:**
+
+Com o Docker rodando, execute em um novo terminal:
+```bash
+docker-compose logs -f backend
 ```
 
-**Validação:**
-- CEP deve ter exatamente 8 dígitos
-- Aceita com ou sem hífen
-- Exibe feedback em tempo real (incompleto/não encontrado/encontrado)
+Faça um RSVP no frontend e observe o log formatado com o conteúdo do email.
 
-**Limitações:**
-- Apenas CEPs brasileiros
-- Alguns CEPs muito novos podem não estar disponíveis
+## 🐛 Solução de Problemas
 
----
-
-## 📧 Notificações por Email (Melhoria Futura)
-
-Atualmente, o sistema **simula** o envio de emails. Quando um convidado confirma, modifica ou cancela presença, o backend **imprime o email no console** ao invés de enviar de fato.
-
-**Modo Atual (Simulação):**
-- Emails são logados no console/Docker logs
-- Anfitrião **não recebe** notificações reais por email
-- Útil para desenvolvimento e testes sem configuração adicional
-
-**Melhoria Futura - Integração SendGrid:**
-
-Para habilitar envio real de emails em produção, o sistema está preparado para integração com SendGrid:
-
-- **API:** [SendGrid Email API](https://sendgrid.com/)
-- **Plano gratuito:** 100 emails/dia
-- **Configuração:** Adicionar `SENDGRID_API_KEY` e `SENDER_EMAIL` no backend
-- **Documentação completa:** Veja instruções no README do backend
-
----
-
-## 🛠️ Configuração de Desenvolvimento
-
-Para facilitar o desenvolvimento, o sistema possui comportamento gracioso quando APIs não estão configuradas:
-
-- **Sem Google Maps:** Mapa não é exibido, restante da aplicação funciona normalmente
-- **Sem WeatherAPI:** Widget de clima não é exibido no convite
-- **Sem Google Geocoding:** Sistema usa Nominatim como fallback (backend)
-- **ViaCEP:** API pública e gratuita, sempre disponível (não requer configuração)
-- **Emails:** Sistema sempre usa modo simulação (logs no console)
-
-## 🐳 Como Funciona o Docker
-
-### Arquitetura
-
-O `docker-compose.yml` orquestra dois containers:
-
-1. **venha_backend** (Flask)
-   - Porta: 5000
-   - Imagem: Python 3.11
-   - Volume: `../backend:/app` (código montado para edição em tempo real)
-
-2. **venha_frontend** (Next.js)
-   - Porta: 3000
-   - Imagem: Node 20 Alpine
-   - Volume: `.:/app` (código montado para edição em tempo real)
-
-### Volumes
-
-Os volumes permitem que você edite o código localmente e veja as mudanças refletidas nos containers automaticamente:
-
-- **Frontend:** Hot reload do Next.js funciona normalmente
-- **Backend:** Auto-reload do Flask detecta mudanças
-
-### Rede
-
-Os containers se comunicam através da rede `venha_network`:
-
-- O frontend acessa o backend via `http://localhost:5000` (do ponto de vista do seu navegador)
-- Internamente, os containers podem se comunicar pelos nomes dos serviços
-
-## 🧪 Testando a Aplicação
-
-### Fluxo Completo de Teste
-
-1. **Criar uma conta:**
-   - Acesse http://localhost:3000/signup
-   - Preencha o formulário de cadastro
-   - Faça login
-
-2. **Criar um evento:**
-   - No dashboard, clique em "Criar Novo Evento"
-   - Preencha os detalhes do evento
-   - Copie o link de convite gerado
-
-3. **Confirmar presença como convidado:**
-   - Abra o link de convite em uma aba anônima
-   - Preencha o formulário de RSVP
-   - Verifique o email do anfitrião (se SendGrid estiver configurado)
-
-4. **Gerenciar confirmação:**
-   - Use o mesmo WhatsApp para buscar sua confirmação
-   - Modifique ou cancele a presença
-
-## ⚠️ Solução de Problemas
-
-### Erro: "Cannot connect to the Docker daemon"
-
-Docker Desktop não está rodando. Inicie o Docker Desktop e aguarde a baleia ficar verde/estável.
-
-### Erro: "Port 3000 is already in use"
-
-Você tem o Next.js rodando localmente. Pare o servidor local antes de rodar o Docker:
-
+### Erro: Porta já em uso (3000)
 ```bash
+# Mac/Linux
 lsof -ti:3000 | xargs kill -9
 ```
 
-### Erro: "Network Error" ou CORS
+### Containers não iniciam ou erro de dependências
+```bash
+docker-compose down -v
+docker-compose up --build --force-recreate
+```
 
-O backend não está acessível. Verifique:
-1. O container `venha_backend` está rodando: `docker ps`
-2. Logs do backend: `docker logs venha_backend`
-3. NEXT_PUBLIC_API_URL está correto em `.env.local`
-
-### Mudanças no código não aparecem
-
-**Frontend:**
-- O Next.js pode demorar alguns segundos para recompilar
-- Verifique os logs: `docker-compose logs -f frontend`
-- Em último caso, reinicie: `docker restart venha_frontend`
-
-**Backend:**
-- Verifique se o Flask detectou a mudança nos logs
-- Reinicie se necessário: `docker restart venha_backend`
+### Frontend não consegue conectar ao backend (Network Error)
+- Verifique se `NEXT_PUBLIC_API_URL=http://localhost:5000` em `frontend/.env.local`
+- Verifique se `FRONTEND_URL=http://localhost:3000` em `backend/.env`
+- Certifique-se de que ambos os containers estão rodando: `docker ps`
 
 ### Google Maps não aparece
+1. Verifique se `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` está configurado em `.env.local`
+2. Certifique-se de que a API "Maps JavaScript API" está ativa no Google Cloud
+3. Abra o console do navegador (F12) para verificar erros
+4. Reinicie o container após alterar `.env.local`: `docker restart venha_frontend`
 
-1. Verifique se `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` está configurado
-2. Certifique-se de que a API do Google Maps está ativa no seu projeto
-3. Verifique o console do navegador para erros
-4. Reinicie o frontend após alterar `.env.local`
+### Previsão do tempo não aparece
+1. Verifique se `NEXT_PUBLIC_WEATHER_API_KEY` está configurado em `.env.local`
+2. Certifique-se de que o evento tem data até 3 dias no futuro (limitação do plano gratuito)
+3. Verifique se o evento tem coordenadas (criado com geocoding bem-sucedido)
 
 ## 📝 Notas para Avaliadores
 
 Este projeto foi desenvolvido como parte da Sprint de Arquitetura de Software da Pós-Graduação em Engenharia de Software da PUC-Rio.
 
-### Para rodar o projeto completo:
+### Guia Rápido de Avaliação
 
-1. Clone ambos os repositórios (backend e frontend) no mesmo diretório pai:
-   ```
-   projeto/
-   ├── backend/
-   └── frontend/
-   ```
+**Siga os passos de instalação acima** na seção "Como Rodar o Projeto (Docker)".
 
-2. Configure os arquivos `.env`:
-   - `backend/.env` (veja backend/README.md)
-   - `frontend/.env.local` (veja acima)
+### Fluxo de Teste Sugerido
 
-3. A partir da pasta `frontend/`, rode:
-   ```bash
-   docker-compose up --build
-   ```
+1. **Criar Conta:** Acesse http://localhost:3000 e crie uma conta de anfitrião
+2. **Criar Evento:** No dashboard, crie um evento de teste
+   - Use um CEP válido (ex: 22040-020 - Copacabana, Rio de Janeiro)
+   - Preencha título, descrição, data e horários
+   - O sistema buscará o endereço automaticamente via ViaCEP
+3. **Visualizar Mapa:** Após criar, o evento terá coordenadas obtidas via Google Geocoding (ou Nominatim)
+4. **Copiar Link:** Copie o link do convite gerado
+5. **Simular Convidado:** Abra o link em uma aba anônima do navegador
+6. **Ver Detalhes:** Observe:
+   - Mapa interativo com localização do evento (Google Maps)
+   - Previsão do tempo para a data (WeatherAPI - apenas eventos até 3 dias)
+   - Detalhes do evento
+7. **Confirmar Presença:** Preencha o formulário de RSVP
+8. **Ver Notificação:** Execute `docker-compose logs -f backend` para ver o email simulado
+9. **Gerenciar RSVPs:** Volte ao dashboard do anfitrião e visualize a lista de confirmações
+10. **Exportar CSV:** Teste a exportação da lista de convidados
+11. **Modificar/Cancelar:** Use o mesmo WhatsApp para buscar e modificar a confirmação
 
-4. Acesse http://localhost:3000
+### 🌐 APIs Externas Utilizadas
 
-### Testando sem Google Maps:
+Veja a seção **"APIs Externas"** acima para detalhes completos sobre endpoints, parâmetros e uso.
 
-O mapa é opcional. Se não configurar a chave do Google Maps, o evento simplesmente não exibirá o mapa (comportamento gracioso).
+### Comportamento Gracioso
 
-### Testando sem SendGrid:
+O sistema foi projetado para funcionar mesmo quando algumas APIs não estão disponíveis:
 
-O backend pode ser configurado para apenas imprimir emails no console. Veja instruções no README do backend.
+| API | Se não configurada | Impacto no usuário |
+|-----|-------------------|-------------------|
+| **Google Maps** | Mapa não renderiza | Convite exibido sem mapa, demais informações intactas |
+| **WeatherAPI** | Widget não aparece | Convite exibido sem previsão do tempo |
+| **Google Geocoding** | Usa Nominatim (OSM) | Nenhum (fallback automático no backend) |
+| **Nominatim** | Evento sem coordenadas | Mapas e clima não aparecem, evento funciona normalmente |
+| **ViaCEP** | Busca manual de endereço | Usuário precisa digitar endereço completo manualmente |
+
+### 📧 Sistema de Notificações
+
+**O sistema opera em MODO SIMULAÇÃO.**
+
+Os emails **NÃO são enviados** de verdade. Os emails são simulados e aparecem apenas nos logs do backend.
+
+**Para ver os emails simulados:**
+1. Com o Docker rodando, abra um novo terminal
+2. Execute: `docker-compose logs -f backend`
+3. No navegador, faça um RSVP
+4. Observe o log formatado no terminal
+
+**Eventos que geram emails simulados:**
+- Novo RSVP confirmado
+- Modificação de confirmação
+- Cancelamento de presença
+
+### 🐳 Comandos Úteis para Avaliação
+
+**Ver logs em tempo real (ambos os serviços):**
+```bash
+docker-compose logs -f
+```
+
+**Ver apenas logs do frontend:**
+```bash
+docker-compose logs -f frontend
+```
+
+**Ver apenas logs do backend (incluindo emails simulados):**
+```bash
+docker-compose logs -f backend
+```
+
+**Parar os containers:**
+```bash
+docker-compose down
+```
+
+**Reiniciar um serviço específico:**
+```bash
+docker restart venha_frontend
+docker restart venha_backend
+```
+
+**Limpar tudo e recomeçar:**
+```bash
+docker-compose down -v
+docker-compose up --build --force-recreate
+```
+
+### 📚 Documentação Adicional
+
+- **Arquitetura Completa:** Veja `ARCHITECTURE.md` (backend) para diagrama detalhado da arquitetura do sistema
+- **API REST:** http://localhost:5000/api/docs para documentação Swagger interativa
+- **Código Fonte:** Todos os componentes React estão em `src/app/components/`
 
 ## 📄 Licença
 
