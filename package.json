@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
-    "@react-google-maps/api": "^2.20.7",
     "antd": "^6.1.0",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",

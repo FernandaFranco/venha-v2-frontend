@@ -411,14 +411,12 @@ END:VCALENDAR`;
           </Button>
         </Card>
 
-        {/* Mapa - só mostra se tiver coordenadas */}
-        {event.latitude && event.longitude && (
+        {/* Mapa */}
+        {event.address_full && (
           <Card title="Localização" className="mb-6">
             <div style={{ height: "300px" }}>
               <MapWithNoSSR
                 address={event.address_full}
-                latitude={event.latitude}
-                longitude={event.longitude}
               />
             </div>
           </Card>
