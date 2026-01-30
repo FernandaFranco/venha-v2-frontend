@@ -19,6 +19,8 @@ services:
       - FRONTEND_URL=http://localhost:3000
     env_file:
       - ../backend/.env
+    # Sobrescreve CMD do Dockerfile para usar servidor de desenvolvimento
+    command: python app.py
     networks:
       - venha_network
     restart: unless-stopped
