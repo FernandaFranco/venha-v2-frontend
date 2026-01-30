@@ -1,6 +1,8 @@
-# Venha - Frontend (Next.js)
+# Venha v2 - Frontend (Next.js)
 
 Interface web para o sistema de convites online Venha, permitindo que anfitriões gerenciem eventos e convidados confirmem presença.
+
+> **Nota:** Esta é a versão 2 (v2) do Venha, com arquitetura simplificada. A versão original está disponível em [rsvp_app_front_end](https://github.com/FernandaFranco/rsvp_app_front_end).
 
 ## 📋 Sobre o Projeto
 
@@ -29,10 +31,8 @@ O sistema Venha permite que anfitriões criem eventos e gerem um link de convite
 
 ## 🏗️ Arquitetura da Aplicação
 
-![Diagrama de Arquitetura](docs/architecture-diagram.png)
-
 <details>
-<summary>💡 Ver código Mermaid (clique para expandir)</summary>
+<summary>💡 Ver diagrama de arquitetura (clique para expandir)</summary>
 
 ```mermaid
 graph LR
@@ -40,11 +40,8 @@ graph LR
     B <-->|SQL| C[("Database<br/>SQLite<br/>(local)")]
 
     A <-.->|REST| D[ViaCEP]
-    A <-.->|REST| E[Google Maps API]
+    A <-.->|iframe| E[Google Maps]
     A <-.->|REST| F[WeatherAPI]
-
-    B <-.->|REST| G[Google Geocoding API]
-    B <-.->|REST<br/>fallback| H[Nominatim OSM]
 
     style A fill:#b3e0ff,stroke:#333,stroke-width:2px,color:#000
     style B fill:#b3e0ff,stroke:#333,stroke-width:2px,color:#000
@@ -52,8 +49,6 @@ graph LR
     style D fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
     style E fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
     style F fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
-    style G fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
-    style H fill:#ffe6b3,stroke:#333,stroke-width:2px,color:#000
 ```
 
 </details>
@@ -61,7 +56,7 @@ graph LR
 **Legenda:**
 
 - **Linha contínua (←→):** Comunicação obrigatória
-- **Linha tracejada (←-→):** Comunicação opcional ou fallback
+- **Linha tracejada (←-→):** Comunicação opcional
 - **🐳 (Docker):** Container Docker separado
 - **Azul:** Módulos implementados no projeto
 - **Amarelo:** APIs externas
@@ -71,39 +66,35 @@ graph LR
 - **Frontend (Next.js) 🐳:** Interface web responsiva, páginas públicas e privadas, autenticação via session cookies
 - **Backend (Flask) 🐳:** API REST com lógica de negócio, validações, documentação Swagger automática
 - **Database (SQLite):** Arquivo local montado via volume Docker para persistência de dados (hosts, eventos e RSVPs)
-- **APIs Externas Frontend:** ViaCEP (endereços), Google Maps (mapas), WeatherAPI (clima)
-- **APIs Externas Backend:** Google Geocoding (coordenadas) com fallback Nominatim
+- **APIs Externas:** ViaCEP (endereços), Google Maps (mapas via iframe), WeatherAPI (clima)
 - **Notificações:** Emails simulados no console (sem envio real)
 
 ## 🌐 APIs Externas
 
 O frontend integra-se com as seguintes APIs externas:
 
-### 1. Google Maps JavaScript API
+### 1. Google Maps (iframe embed)
 
-**URL:** https://developers.google.com/maps/documentation/javascript
-
-**Propósito:** Exibição de mapas interativos nas páginas de convite.
+**Propósito:** Exibição de mapas nas páginas de convite e criação de evento.
 
 **Licença/Custo:**
 
-- Plano gratuito com crédito mensal de $200 USD
-- Primeiras 28.000 carregamentos de mapa/mês são gratuitos
-- Licença: Proprietária (Google)
+- **Gratuito** - Usa iframe embed do Google Maps, não requer chave de API
+- Funciona passando o endereço diretamente na URL
 
 **Uso no Frontend:**
 
 - Componente: `src/app/components/EventMap.js`
-- Biblioteca: `@react-google-maps/api`
 - Páginas:
   - `/invite/[slug]/page.js` (página pública do convite para convidados)
   - `/eventos/novo/page.js` (página de criação de evento para anfitriões)
 
-**Endpoints utilizados:**
+**Como funciona:**
 
-- Google Maps JavaScript API (carregada via script tag)
-  - URL: `https://maps.googleapis.com/maps/api/js`
-  - Parâmetros: `key` (API key), `libraries=places`
+O mapa é renderizado via iframe usando a URL:
+```
+https://www.google.com/maps?q={endereço}&z=15&output=embed
+```
 
 ### 2. WeatherAPI
 
@@ -126,7 +117,7 @@ O frontend integra-se com as seguintes APIs externas:
 **Endpoints utilizados:**
 
 - `GET https://api.weatherapi.com/v1/forecast.json`
-  - Parâmetros: `key` (API key), `q` (lat,lng), `days=1`, `lang=pt`
+  - Parâmetros: `key` (API key), `q` (cidade), `days`, `lang=pt`
   - Retorna: `forecast.forecastday[0].day` (temperatura, condição, ícone)
 
 ### 3. ViaCEP
@@ -168,7 +159,7 @@ frontend/
 ├── src/
 │   └── app/
 │       ├── components/          # Componentes React reutilizáveis
-│       │   ├── EventMap.js     # Mapa do Google Maps
+│       │   ├── EventMap.js     # Mapa do Google (iframe embed)
 │       │   ├── ErrorBoundary.js # Tratamento de erros
 │       │   ├── LoadingSkeleton.js # Estados de carregamento
 │       │   └── Logo.js         # Logo da aplicação
@@ -218,8 +209,8 @@ Crie um diretório pai e clone ambos os projetos:
 ```bash
 mkdir venha_project
 cd venha_project
-git clone https://github.com/FernandaFranco/rsvp_app_api.git backend
-git clone https://github.com/FernandaFranco/rsvp_app_front_end.git frontend
+git clone https://github.com/FernandaFranco/venha-v2-backend.git backend
+git clone https://github.com/FernandaFranco/venha-v2-frontend.git frontend
 ```
 
 **Importante:** Os comandos acima clonam os repositórios nas pastas `backend` e `frontend` respectivamente, que são os nomes esperados pelo Docker Compose.
@@ -260,16 +251,9 @@ FLASK_ENV=development
 SECRET_KEY=sua-chave-secreta-aqui    # Gere com: python3 -c "import secrets; print(secrets.token_hex(32))"
 DATABASE_URL=sqlite:///invitations.db
 
-# Necessária para endereços brasileiros (usa Nominatim como fallback, mas com limitações)
-GOOGLE_GEOCODING_API_KEY=sua-chave-google-aqui
-
 # Frontend URL
 FRONTEND_URL=http://localhost:3000
 ```
-
-Veja o README do backend para instruções completas sobre como obter a chave GOOGLE_GEOCODING_API_KEY.
-
-> **Nota para Avaliadores:** A chave de API do Google Geocoding é a mesma que a do Maps e será disponibilizada de modo privado ao enviar as URLs para avaliação.
 
 ### Passo 3: Configurar Frontend (.env.local)
 
@@ -285,37 +269,21 @@ cp .env.local.example .env.local
 2. Edite o arquivo `frontend/.env.local`:
 
 ```bash
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=sua-chave-google-maps-aqui
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PUBLIC_WEATHER_API_KEY=sua-chave-weatherapi-aqui
 ```
 
 **APIs Necessárias:**
 
-- **NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:** Chave do Google Maps JavaScript API (obrigatória para mapas)
 - **NEXT_PUBLIC_API_URL:** URL do backend (use `http://localhost:5000`)
-- **NEXT_PUBLIC_WEATHER_API_KEY:** Chave do WeatherAPI.com (obrigatória para previsão do tempo)
+- **NEXT_PUBLIC_WEATHER_API_KEY:** Chave do WeatherAPI.com (necessária para previsão do tempo)
 
-**Como obter as chaves:**
-
-**Google Maps API:**
-
-1. Acesse [Google Cloud Console](https://console.cloud.google.com)
-2. Crie um projeto ou selecione um existente
-3. Ative a API "Maps JavaScript API"
-4. Vá em "Credenciais" → "Criar credenciais" → "Chave de API"
-5. Copie a chave gerada
-
-> **Nota para Avaliadores:** A chave de API do Google Maps será disponibilizada de modo privado ao enviar as URLs para avaliação.
-
-**WeatherAPI:**
+**Como obter a chave WeatherAPI:**
 
 1. Acesse [WeatherAPI.com](https://www.weatherapi.com/)
 2. Crie uma conta gratuita (1 milhão de chamadas/mês grátis)
 3. Vá em "My Account" → "API Keys"
 4. Copie a chave gerada
-
-> **Nota para Avaliadores:** A chave de API do WeatherAPI será disponibilizada de modo privado ao enviar as URLs para avaliação.
 
 ### Passo 4: Rodar com Docker Compose
 
@@ -367,18 +335,10 @@ docker-compose up --build --force-recreate
 - Verifique se `FRONTEND_URL=http://localhost:3000` em `backend/.env`
 - Certifique-se de que ambos os containers estão rodando: `docker ps`
 
-### Google Maps não aparece
-
-1. Verifique se `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` está configurado em `.env.local`
-2. Certifique-se de que a API "Maps JavaScript API" está ativa no Google Cloud
-3. Abra o console do navegador (F12) para verificar erros
-4. Reinicie o container após alterar `.env.local`: `docker restart venha_frontend`
-
 ### Previsão do tempo não aparece
 
 1. Verifique se `NEXT_PUBLIC_WEATHER_API_KEY` está configurado em `.env.local`
 2. Certifique-se de que o evento tem data até 3 dias no futuro (limitação do plano gratuito)
-3. Verifique se o evento tem coordenadas (criado com geocoding bem-sucedido)
 
 ## 📄 Licença
 
@@ -389,5 +349,3 @@ Este projeto foi desenvolvido para fins educacionais.
 Fernanda Franco
 
 PUC-Rio - Pós-Graduação em Engenharia de Software
-
-Sprint de Arquitetura de Software - 2025
